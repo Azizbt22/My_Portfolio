@@ -1,0 +1,1595 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      name="description"
+      content="Refactory, an AI-assisted system for migrating integration applications between four platforms through a canonical intermediate representation."
+    />
+    <title>Refactory case study | Aziz Ben Taher</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23030910'/%3E%3Cpath d='M15 44V20h10l7 10 7-10h10v24h-8V31l-9 12-9-12v13z' fill='%2300d4ff'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="../v2.css" />
+  </head>
+  <body class="project-page refactory-page refactory-v3">
+    <div class="scroll-progress" aria-hidden="true"><span></span></div>
+    <header class="site-header">
+      <a class="wordmark" href="../index.html">Aziz Ben Taher</a>
+      <nav>
+        <a href="../index.html#about">About</a
+        ><a href="../index.html#projects">Projects</a
+        ><a href="../index.html#contact">Contact</a>
+      </nav>
+    </header>
+    <div class="project-nav">
+      <a href="../index.html#projects">← All projects</a><span>01 / 06</span>
+    </div>
+    <main class="refactory-main">
+      <section class="case-hero refactory-hero" id="top">
+        <p class="case-breadcrumb">
+          Professional case study · AI engineering · Devoteam nexDigital · 2026
+        </p>
+        <h1>Refactory</h1>
+        <p class="case-intro">
+          An AI-assisted system for migrating integration applications between
+          MuleSoft, Google Application Integration, Apache Camel and Spring
+          Boot.
+        </p>
+        <div class="abstract-panel">
+          <p class="abstract-label">Project in one minute</p>
+          <p>
+            I designed and developed an AI-assisted system for migrating
+            integration applications between four different platforms. Instead
+            of building a separate converter for every source-target pair,
+            Refactory analyses each source project, reconstructs its behaviour
+            in a shared intermediate representation and generates the
+            corresponding target application. The workflow combines
+            deterministic analysis, structured LLM outputs, retrieval from
+            verified examples, deterministic assembly and behavioural
+            validation.
+          </p>
+          <div class="impact-bridge">
+            <div>
+              <small>Manual migration</small
+              ><strong>Several days to a few weeks</strong
+              ><span>analysis, redevelopment and verification</span>
+            </div>
+            <b>→</b>
+            <div class="accent">
+              <small>Refactory execution</small><strong>5–20 minutes</strong
+              ><span>to produce a first migrated version for review</span>
+            </div>
+          </div>
+        </div>
+        <dl class="case-facts">
+          <div>
+            <dt>My role</dt>
+            <dd>AI Engineer Intern</dd>
+          </div>
+          <div>
+            <dt>Ownership</dt>
+            <dd>Architecture, pipeline, validation and interface</dd>
+          </div>
+          <div>
+            <dt>Stack</dt>
+            <dd>Python, FastAPI, LangChain, structured LLM outputs, RAG</dd>
+          </div>
+        </dl>
+      </section>
+      <div class="case-study-layout">
+        <aside class="case-toc" aria-label="Refactory chapters">
+          <p>Case study</p>
+          <a href="#overview">Overview</a><a href="#ipaas">iPaaS context</a
+          ><a href="#challenges">Migration challenges</a
+          ><a href="#why-ai">Why AI?</a
+          ><a href="#objectives">Objectives</a
+          ><a href="#design-principles">Design principles</a
+          ><a href="#problem">Problem formulation</a
+          ><a href="#manual">Manual migration</a><a href="#pivot">Why an IR?</a
+          ><a href="#architecture">Architecture</a
+          ><a href="#preprocessing">Preprocessing</a
+          ><a href="#ingestion">Ingestion &amp; IR</a
+          ><a href="#generation">Generation</a
+          ><a href="#validation">Validation</a
+          ><a href="#application">Application</a
+          ><a href="#technology">Technology</a
+          ><a href="#retrospective">Retrospective</a
+          ><a href="#learning">What I learned</a>
+        </aside>
+        <article class="case-study-content">
+          <section class="chapter" id="overview">
+            <p class="chapter-number">01 / Overview</p>
+            <h2>Refactory in one sentence.</h2>
+            <p class="chapter-lead">
+              Refactory accelerates the migration of integration applications
+              across MuleSoft, Google Application Integration, Apache Camel and
+              Spring Boot.
+            </p>
+            <p>
+              It analyses a source project, reconstructs its behaviour and
+              produces a target project with the information needed for review,
+              configuration and validation.
+            </p>
+            <div class="chapter-grid two">
+              <article>
+                <h3>What the tool produces</h3>
+                <p>
+                  A complete source project or importable target artefact,
+                  together with an inspectable IR and a migration manifest.
+                </p>
+              </article>
+              <article>
+                <h3>Where human expertise remains</h3>
+                <p>
+                  Environment configuration, credentials, unsupported connectors
+                  and final functional acceptance remain engineering decisions.
+                </p>
+              </article>
+            </div>
+            <h3 class="subsection-title">Platforms covered</h3>
+            <div class="logo-platform-grid">
+              <article>
+                <img
+                  src="../assets/images/platforms/mulesoft.png"
+                  alt="MuleSoft logo"
+                />
+                <div>
+                  <h3>MuleSoft</h3>
+                  <p>XML flows and DataWeave transformations</p>
+                </div>
+              </article>
+              <article>
+                <img
+                  src="../assets/images/platforms/google-cloud.svg"
+                  alt="Google Cloud logo"
+                />
+                <div>
+                  <h3>Google Application Integration</h3>
+                  <p>Managed integrations exported as platform-specific JSON</p>
+                </div>
+              </article>
+              <article>
+                <img
+                  src="../assets/images/platforms/apache-camel.png"
+                  alt="Apache Camel logo"
+                />
+                <div>
+                  <h3>Apache Camel</h3>
+                  <p>Java routes and enterprise integration patterns</p>
+                </div>
+              </article>
+              <article>
+                <img
+                  src="../assets/images/platforms/spring-boot.svg"
+                  alt="Spring logo"
+                />
+                <div>
+                  <h3>Spring Boot</h3>
+                  <p>Imperative Java services and application code</p>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section class="chapter" id="ipaas">
+            <p class="chapter-number">02 / Domain context</p>
+            <h2>What is an iPaaS?</h2>
+            <p class="chapter-lead">
+              An Integration Platform as a Service connects applications and
+              systems that were not designed to communicate directly.
+            </p>
+            <p>
+              An integration can receive an API request, authenticate it,
+              transform the payload, apply routing rules, call several systems
+              and handle technical or business errors. The platform supplies the
+              components and runtime used to express that behaviour.
+            </p>
+            <div class="ipaas-map">
+              <div class="map-column">
+                <span>CRM</span><span>Mobile app</span><span>Partner API</span>
+              </div>
+              <div class="map-core">
+                <small>iPaaS</small><strong>Integration flows</strong
+                ><em>Route · transform · secure · observe</em>
+              </div>
+              <div class="map-column">
+                <span>ERP</span><span>Database</span><span>Cloud service</span>
+              </div>
+            </div>
+            <h3 class="subsection-title">Why organisations move</h3>
+            <div class="driver-grid">
+              <article>
+                <span>01</span>
+                <h3>Cloud strategy</h3>
+                <p>Align integration workloads with a new cloud ecosystem.</p>
+              </article>
+              <article>
+                <span>02</span>
+                <h3>Cost and licensing</h3>
+                <p>
+                  Reduce expenditure or avoid an unfavourable commercial model.
+                </p>
+              </article>
+              <article>
+                <span>03</span>
+                <h3>Standardisation</h3>
+                <p>
+                  Consolidate several integration stacks after growth or
+                  acquisition.
+                </p>
+              </article>
+              <article>
+                <span>04</span>
+                <h3>Modernisation</h3>
+                <p>Replace ageing flows and unsupported components.</p>
+              </article>
+              <article>
+                <span>05</span>
+                <h3>Capability</h3>
+                <p>
+                  Adopt stronger governance, observability or cloud-native
+                  services.
+                </p>
+              </article>
+              <article>
+                <span>06</span>
+                <h3>Vendor independence</h3>
+                <p>
+                  Regain freedom to evolve without rewriting an entire estate
+                  manually.
+                </p>
+              </article>
+            </div>
+          </section>
+
+          <section class="chapter" id="challenges">
+            <p class="chapter-number">03 / Migration challenges</p>
+            <h2>Why is migration difficult?</h2>
+            <p class="chapter-lead">
+              Business logic is deeply tied to each platform. A migration must
+              recover that logic, preserve its meaning and express it through a
+              different technical model.
+            </p>
+            <p>
+              The difficulty comes from four connected constraints. Each one
+              affects delivery speed, cost and confidence in the migrated system.
+            </p>
+            <div class="challenge-table" role="table" aria-label="Migration constraints and delivery impact">
+              <div class="challenge-head" role="row">
+                <span role="columnheader">Constraint</span>
+                <span role="columnheader">Mechanism</span>
+                <span role="columnheader">Delivery impact</span>
+              </div>
+              <article role="row">
+                <h3 role="cell"><small>01</small>Strong coupling</h3>
+                <p role="cell">Business logic is embedded in platform syntax, components and configuration.</p>
+                <p role="cell">Core behaviour is difficult to separate from platform-specific constructions.</p>
+              </article>
+              <article role="row">
+                <h3 role="cell"><small>02</small>Semantic loss</h3>
+                <p role="cell">Syntax conversion does not capture the full meaning or dependencies of a flow.</p>
+                <p role="cell">A technically valid conversion can still change functional behaviour.</p>
+              </article>
+              <article role="row">
+                <h3 role="cell"><small>03</small>Rewrite cost</h3>
+                <p role="cell">Engineers rebuild business logic manually, one flow at a time.</p>
+                <p role="cell">Delivery slows down while technical debt and operating costs increase.</p>
+              </article>
+              <article role="row">
+                <h3 role="cell"><small>04</small>Frozen evolution</h3>
+                <p role="cell">Adding or changing a platform requires more specialised development.</p>
+                <p role="cell">Future platform changes restart a large part of the migration effort.</p>
+              </article>
+            </div>
+            <blockquote class="problem-statement compact-statement">
+              Large estates can turn this repeated work into programmes that run
+              for months or years and require scarce platform expertise.
+            </blockquote>
+          </section>
+
+          <section class="chapter" id="why-ai">
+            <p class="chapter-number">04 / Why AI</p>
+            <h2>A strong use case for language models.</h2>
+            <p class="chapter-lead">
+              Migration combines interpretation, transformation and code
+              generation. The inputs are heterogeneous, the intent is spread
+              across several artefacts and the output must follow the conventions
+              of a different platform.
+            </p>
+            <div class="chapter-grid three ai-fit-grid">
+              <article>
+                <span>01 / Interpret</span>
+                <h3>Recover intent from context</h3>
+                <p>Connect information found across code, XML, configuration, schemas and referenced flows.</p>
+              </article>
+              <article>
+                <span>02 / Transform</span>
+                <h3>Map between different models</h3>
+                <p>Reason about equivalent behaviour when the target platform expresses it differently.</p>
+              </article>
+              <article>
+                <span>03 / Generate</span>
+                <h3>Produce target-native artefacts</h3>
+                <p>Create code and configuration that follow the structure and conventions of the selected target.</p>
+              </article>
+            </div>
+            <p>
+              These capabilities can remove a large amount of repetitive work
+              from migration projects. Engineers can begin with a generated
+              baseline and focus their time on review, unsupported cases,
+              configuration and functional acceptance.
+            </p>
+            <aside class="trial-note">
+              <span>Initial experiment</span>
+              <div>
+                <h3>Direct migration with Claude Code, Opus 4.8</h3>
+                <p>
+                  The generated projects looked credible. Consistency across
+                  files and dependencies remained unreliable. The trial confirmed the
+                  value of AI and showed why it needed a structured workflow with
+                  independent controls.
+                </p>
+              </div>
+            </aside>
+          </section>
+
+          <section class="chapter" id="objectives">
+            <p class="chapter-number">05 / Objectives and constraints</p>
+            <h2>What the solution had to optimise.</h2>
+            <p class="chapter-lead">
+              The solution had to reduce migration effort while preserving trust
+              in the generated result.
+            </p>
+            <div class="objective-table">
+              <article>
+                <span>01</span>
+                <div><h3>Productivity</h3><p>Automate repeated analysis and implementation work so experts can concentrate on review and exceptional cases.</p></div>
+                <strong>Less manual effort</strong>
+              </article>
+              <article>
+                <span>02</span>
+                <div><h3>Fidelity</h3><p>Preserve routing, transformations, dependencies, side effects and error behaviour across execution models.</p></div>
+                <strong>Equivalent behaviour</strong>
+              </article>
+              <article>
+                <span>03</span>
+                <div><h3>Traceability</h3><p>Keep generated decisions, source references, warnings and remaining actions visible to the engineer.</p></div>
+                <strong>Reviewable output</strong>
+              </article>
+              <article>
+                <span>04</span>
+                <div><h3>Maintainability</h3><p>Keep platform-specific knowledge isolated so new sources and targets can be added without redesigning the whole system.</p></div>
+                <strong>Modular growth</strong>
+              </article>
+              <article>
+                <span>05</span>
+                <div><h3>Security</h3><p>Detect credentials and sensitive configuration before any model interaction and preserve them as explicit placeholders.</p></div>
+                <strong>Controlled data exposure</strong>
+              </article>
+            </div>
+          </section>
+
+          <section class="chapter" id="design-principles">
+            <p class="chapter-number">06 / Design principles</p>
+            <h2>Structure the intelligence before building the pipeline.</h2>
+            <p class="chapter-lead">
+              Integration migration is not fault tolerant. A subtle change in a
+              condition, variable or error path can alter production behaviour.
+              The architecture therefore limits uncertainty and makes each result
+              inspectable.
+            </p>
+            <div class="design-principles">
+              <article>
+                <span>01 / Modular architecture</span>
+                <h3>Separate source knowledge, shared meaning and target knowledge</h3>
+                <p>Each part can evolve, be tested and be maintained without spreading platform-specific logic through the system.</p>
+              </article>
+              <article>
+                <span>02 / Explicit AI workflow</span>
+                <h3>Give models bounded responsibilities</h3>
+                <p>Structured inputs, typed outputs and clear stage boundaries reduce hidden assumptions and make failures easier to locate.</p>
+              </article>
+              <article>
+                <span>03 / Independent control</span>
+                <h3>Validate outside the model</h3>
+                <p>Generated artefacts are checked against contracts, references and executable tests before they are accepted.</p>
+              </article>
+            </div>
+            <h3 class="subsection-title">Responsibility by principle</h3>
+            <div class="responsibility-split">
+              <article class="ai-role">
+                <small>AI</small>
+                <h3>Tasks that require interpretation</h3>
+                <ul>
+                  <li>Understand business intent from heterogeneous context</li>
+                  <li>Propose semantic mappings and target structures</li>
+                  <li>Generate code and configuration</li>
+                  <li>Suggest focused corrections from validated errors</li>
+                </ul>
+              </article>
+              <article class="deterministic-role">
+                <small>Deterministic software</small>
+                <h3>Tasks that require certainty</h3>
+                <ul>
+                  <li>Extract facts from known formats</li>
+                  <li>Enforce schemas, identifiers and contracts</li>
+                  <li>Protect secrets and assemble artefacts</li>
+                  <li>Compile, execute and validate the result</li>
+                </ul>
+              </article>
+            </div>
+          </section>
+
+          <section class="chapter" id="problem">
+            <p class="chapter-number">07 / Problem formulation</p>
+            <h2>Migration is a semantic problem.</h2>
+            <p class="chapter-lead">
+              An integration application is an execution graph. Routing,
+              transformations, side effects and failure paths all interact.
+            </p>
+            <div class="case-stepper semantic-stepper" data-case-stepper>
+              <div class="step-tabs" role="tablist">
+                <button type="button" class="step-tab" data-case-step-tab>
+                  Direct translation</button
+                ><button type="button" class="step-tab" data-case-step-tab>
+                  Real migration</button
+                ><button type="button" class="step-tab" data-case-step-tab>
+                  Project structures
+                </button>
+              </div>
+              <div class="step-panels">
+                <article class="step-panel" data-case-step-panel>
+                  <span>01 / THE MISLEADING MODEL</span>
+                  <h3>Line-by-line conversion</h3>
+                  <p>
+                    A conventional converter assumes that elements arrive in
+                    order and have direct equivalents. That works for a local
+                    syntax transformation. An application distributes behaviour
+                    across configuration, code and referenced flows.
+                  </p>
+                  <div class="line-translation">
+                    <div><i>L1</i><i>L2</i><i>L3</i><i>L4</i></div>
+                    <b>→</b>
+                    <div><i>L1′</i><i>L2′</i><i>L3′</i><i>L4′</i></div>
+                  </div>
+                </article>
+                <article class="step-panel" data-case-step-panel>
+                  <span>02 / THE ACTUAL OBJECT</span>
+                  <h3>Reconstruct an execution graph</h3>
+                  <p>
+                    The system must understand how a trigger, transformation,
+                    condition, API call, response and error path relate.
+                    Equivalent behaviour may require a different structure on
+                    the target.
+                  </p>
+                  <div class="execution-graph">
+                    <span>Trigger</span><b>→</b><span>Transform</span><b>→</b
+                    ><span class="decision">IF</span>
+                    <div class="graph-branch">
+                      <span>API call</span><span class="error">Error path</span>
+                    </div>
+                    <b>→</b><span>Response</span>
+                  </div>
+                </article>
+                <article class="step-panel" data-case-step-panel>
+                  <span>03 / DIFFERENT ARTEFACTS</span>
+                  <h3>The same intent can live in very different projects</h3>
+                  <p>
+                    A Google integration can appear as a visual task graph,
+                    MuleSoft as connected XML files and Spring Boot as
+                    controllers, services, models and exception handlers.
+                    Migration begins by reconstructing comparable meaning from
+                    these different architectures.
+                  </p>
+                  <div class="project-forms">
+                    <div>
+                      <small>GOOGLE APPLICATION INTEGRATION</small>
+                      <div class="mini-canvas">
+                        <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                      </div>
+                    </div>
+                    <div>
+                      <small>MULESOFT · XML</small>
+                      <pre>src/main/mule/<br>├─ api-main.xml<br>├─ global.xml<br>└─ implementation.xml<br>src/main/resources/<br>└─ configuration.yaml</pre>
+                    </div>
+                    <div>
+                      <small>SPRING BOOT · JAVA</small>
+                      <pre>src/main/java/<br>├─ controller/<br>├─ service/<br>├─ model/<br>└─ exception/<br>pom.xml</pre>
+                    </div>
+                    <div>
+                      <small>APACHE CAMEL · JAVA ROUTES</small>
+                      <pre>src/main/java/<br>├─ routes/<br>├─ processors/<br>├─ aggregation/<br>└─ error/<br>application.properties</pre>
+                    </div>
+                  </div>
+                </article>
+              </div>
+              <div class="step-hint">Use the tabs or swipe the panel</div>
+            </div>
+            <blockquote class="problem-statement">
+              Migration reconstructs intent and expresses it faithfully in
+              another execution model.
+            </blockquote>
+          </section>
+
+          <section class="chapter" id="manual">
+            <p class="chapter-number">08 / Existing process</p>
+            <h2>What a manual migration involves.</h2>
+            <p class="chapter-lead">
+              Before automating the task, I represented the work an integration
+              engineer performs: inventory the source, define the target
+              architecture, order the migration by dependency, rebuild the
+              project, then deploy and validate it.
+            </p>
+            <div class="manual-rail">
+              <article>
+                <span>01</span>
+                <h3>Frame &amp; inventory</h3>
+                <p>Objectives, scope, assets and dependencies</p>
+              </article>
+              <b>→</b>
+              <article>
+                <span>02</span>
+                <h3>Define the target</h3>
+                <p>Architecture, gaps and risks</p>
+              </article>
+              <b>→</b>
+              <article>
+                <span>03</span>
+                <h3>Plan the work</h3>
+                <p>Order according to dependencies and criticality</p>
+              </article>
+              <b>→</b>
+              <article>
+                <span>04</span>
+                <h3>Migrate &amp; validate</h3>
+                <p>Build, deploy, verify and stabilise</p>
+              </article>
+            </div>
+            <p>
+              The process is iterative: validation frequently reveals a missing
+              assumption and sends the engineer back to the target design or
+              migration plan.
+            </p>
+            <h3 class="subsection-title">The scaling problem</h3>
+            <p>
+              A converter written for every platform pair grows from
+              <strong>N × M</strong>. With four sources and four targets,
+              sixteen separate translation paths are required.
+            </p>
+            <figure class="embedded-figure architecture-source-figure pairwise-figure">
+              <img
+                src="../assets/images/refactory/pairwise-scaling.png"
+                alt="Pairwise architecture connecting four source platforms directly to four target platforms"
+              />
+              <figcaption>
+                Four sources and four targets already require sixteen distinct
+                translators. Each new platform adds another full set of
+                source-target paths.
+              </figcaption>
+            </figure>
+          </section>
+
+          <section class="chapter" id="pivot">
+            <p class="chapter-number">09 / Architectural decision</p>
+            <h2>
+              Introduce one canonical model between two independent subsystems.
+            </h2>
+            <p class="chapter-lead">
+              The intermediate representation removes direct knowledge between
+              source analysis and target generation.
+            </p>
+            <figure class="embedded-figure architecture-source-figure ir-comparison-figure">
+              <img
+                src="../assets/images/refactory/ir-comparison.png"
+                alt="Comparison between pairwise direct translators and an architecture using an intermediate representation"
+              />
+              <figcaption>
+                The intermediate representation replaces sixteen pair-specific
+                translators with four source adapters and four target generators.
+                Adding a platform now requires one adapter instead of a complete
+                row of converters.
+              </figcaption>
+            </figure>
+            <p>
+              This choice makes the architecture extensible, but it also makes
+              the IR a critical contract. It must preserve behaviour without
+              reproducing the vocabulary of one particular platform.
+            </p>
+          </section>
+
+          <section class="chapter" id="architecture">
+            <p class="chapter-number">10 / System architecture</p>
+            <h2>The complete migration pipeline.</h2>
+            <p class="chapter-lead">
+              Refactory has two subsystems joined by the canonical IR. The first
+              understands the source; the second builds and validates the
+              target.
+            </p>
+            <div class="two-subsystems">
+              <div>
+                <small>SOURCE SUBSYSTEM</small
+                ><strong>Deterministic analysis + semantic ingestion</strong>
+              </div>
+              <b>→</b>
+              <div class="ir-node">Canonical<br /><strong>IR</strong></div>
+              <b>→</b>
+              <div>
+                <small>TARGET SUBSYSTEM</small
+                ><strong
+                  >Constrained generation + deterministic controls</strong
+                >
+              </div>
+            </div>
+            <div class="end-to-end-map">
+              <article>
+                <span>01</span>
+                <h3>Preprocess</h3>
+                <p>Parse and normalise the source</p>
+              </article>
+              <b>→</b>
+              <article>
+                <span>02</span>
+                <h3>Ingest</h3>
+                <p>Interpret application semantics</p>
+              </article>
+              <b>→</b>
+              <article class="accent">
+                <span>03</span>
+                <h3>IR</h3>
+                <p>Store independent intent</p>
+              </article>
+              <b>→</b>
+              <article>
+                <span>04</span>
+                <h3>Generate</h3>
+                <p>Plan, write and assemble</p>
+              </article>
+              <b>→</b>
+              <article>
+                <span>05</span>
+                <h3>Assemble</h3>
+                <p>Build a coherent target project</p>
+              </article>
+              <b>→</b>
+              <article>
+                <span>06</span>
+                <h3>Repair</h3>
+                <p>Use concrete execution feedback</p>
+              </article>
+              <b>→</b>
+              <article>
+                <span>07</span>
+                <h3>Validate</h3>
+                <p>Check structure and behaviour</p>
+              </article>
+              <b>→</b>
+              <article>
+                <span>08</span>
+                <h3>Document</h3>
+                <p>Generate the migration manifest</p>
+              </article>
+            </div>
+            <div class="design-rule">
+              <span>Separation rule</span>
+              <p>
+                Everything before the IR knows only the source. Everything after
+                it knows only the target. Neither subsystem imports
+                platform-specific logic from the other.
+              </p>
+            </div>
+          </section>
+
+          <section class="chapter" id="preprocessing">
+            <p class="chapter-number">11 / Source subsystem</p>
+            <h2>
+              Preprocessing: reconstruct the project before asking the model to
+              interpret it.
+            </h2>
+            <p class="chapter-lead">
+              The preprocessor converts a repository into a normalised, ordered
+              and secret-free description of the application.
+            </p>
+            <div class="io-contract">
+              <div>
+                <small>INPUT</small><strong>Native project repository</strong>
+                <p>
+                  XML, JSON or Java files, build descriptors, configuration and
+                  references.
+                </p>
+              </div>
+              <b>→</b>
+              <div class="accent">
+                <small>OUTPUT</small><strong>Normalised project graph</strong>
+                <p>
+                  Ordered flows, symbols, dependencies, API contracts and
+                  protected placeholders.
+                </p>
+              </div>
+            </div>
+            <div class="pipeline-rail">
+              <div>
+                <span>01</span><strong>Discover files</strong
+                ><small
+                  >Locate platform artefacts, resources and build
+                  metadata.</small
+                >
+              </div>
+              <div>
+                <span>02</span><strong>Parse native structures</strong
+                ><small
+                  >Read XML, JSON or Java without asking a model to infer
+                  syntax.</small
+                >
+              </div>
+              <div>
+                <span>03</span><strong>Build the dependency graph</strong
+                ><small
+                  >Connect flows, referenced subflows and shared
+                  components.</small
+                >
+              </div>
+              <div>
+                <span>04</span><strong>Topological ordering</strong
+                ><small
+                  >Arrange dependent elements into coherent context.</small
+                >
+              </div>
+              <div>
+                <span>05</span><strong>Extract symbols and contracts</strong
+                ><small
+                  >Record variables, properties, endpoints and API
+                  definitions.</small
+                >
+              </div>
+              <div>
+                <span>06</span><strong>Protect sensitive values</strong
+                ><small
+                  >Replace credentials and internal endpoints before any model
+                  call.</small
+                >
+              </div>
+            </div>
+            <div class="case-stepper compact-stepper" data-case-stepper>
+              <div class="step-tabs" role="tablist">
+                <button type="button" class="step-tab" data-case-step-tab>
+                  Dependencies</button
+                ><button type="button" class="step-tab" data-case-step-tab>
+                  Ordering</button
+                ><button type="button" class="step-tab" data-case-step-tab>
+                  Symbols</button
+                ><button type="button" class="step-tab" data-case-step-tab>
+                  Secrets
+                </button>
+              </div>
+              <div class="step-panels">
+                <article class="step-panel" data-case-step-panel>
+                  <span>TECHNICAL VIEW 01</span>
+                  <h3>Reconstruct cross-file dependencies</h3>
+                  <p>
+                    Calls between flows, referenced subflows and shared
+                    configurations become a directed graph. Unresolved
+                    references are recorded instead of silently ignored.
+                  </p>
+                  <div class="tech-flow dependency-flow">
+                    <i>API flow</i><b>→</b><i>Validation subflow</i><b>→</b
+                    ><i>Backend flow</i><b>→</b><i>Error handler</i>
+                  </div>
+                </article>
+                <article class="step-panel" data-case-step-panel>
+                  <span>TECHNICAL VIEW 02</span>
+                  <h3>Build a coherent analysis order</h3>
+                  <p>
+                    Topological ordering places dependencies before their
+                    consumers. Cycles are retained explicitly because they may
+                    describe retries, recursive routing or a modelling error.
+                  </p>
+                  <div class="tech-flow">
+                    <i>Graph</i><b>→</b><i>Cycle check</i><b>→</b
+                    ><i>Topological order</i><b>→</b><i>Context windows</i>
+                  </div>
+                </article>
+                <article class="step-panel" data-case-step-panel>
+                  <span>TECHNICAL VIEW 03</span>
+                  <h3>Resolve variables and configuration references</h3>
+                  <p>
+                    The symbol table records variables, properties, component
+                    references and their scopes so the ingestion model can
+                    interpret values defined outside the current file.
+                  </p>
+                  <div class="symbol-sample">
+                    <code>http.listener.port</code><span>project property</span
+                    ><code>vars.customerId</code><span>flow scope</span
+                    ><code>Backend_HTTP</code><span>global configuration</span>
+                  </div>
+                </article>
+                <article class="step-panel" data-case-step-panel>
+                  <span>TECHNICAL VIEW 04</span>
+                  <h3>Separate sensitive values before model calls</h3>
+                  <p>
+                    Credentials, tokens and internal endpoints are removed from
+                    the model input. Their semantic role remains visible through
+                    explicit placeholders and is carried into the migration
+                    manifest.
+                  </p>
+                  <div class="secret-transform">
+                    <code>client.secret = actual-value</code><b>→</b
+                    ><code>client.secret = ${CLIENT_SECRET}</code>
+                  </div>
+                </article>
+              </div>
+              <div class="step-hint">Use the tabs or swipe the panel</div>
+            </div>
+            <h3 class="subsection-title">Example: MuleSoft preprocessing</h3>
+            <figure class="embedded-figure technical-source-figure">
+              <img
+                src="../assets/images/refactory/mulesoft-preprocessing.png"
+                alt="MuleSoft preprocessing graph from source files to the normalised output bundle"
+              />
+              <figcaption>
+                Mule XML, RAML and properties are parsed through dedicated
+                deterministic branches before being combined into one output
+                bundle.
+              </figcaption>
+            </figure>
+            <div class="design-rule">
+              <span>Why deterministic?</span>
+              <p>
+                File discovery, reference resolution and dependency ordering are
+                computable. Giving them to an LLM would add variability without
+                adding useful reasoning.
+              </p>
+            </div>
+          </section>
+
+          <section class="chapter" id="ingestion">
+            <p class="chapter-number">12 / Semantic ingestion</p>
+            <h2>Translate the normalised project into integration intent.</h2>
+            <p class="chapter-lead">
+              The ingestion agent receives the preprocessed graph and maps
+              source elements to a typed, platform-independent schema.
+            </p>
+            <p>
+              It identifies triggers, transformations, external effects, control
+              decisions and error semantics while preserving links back to the
+              source artefacts.
+            </p>
+            <div class="ingestion-flow">
+              <div>
+                <small>PREPROCESSED INPUT</small>
+                <span>Ordered operations</span><span>Dependency graph</span
+                ><span>Symbol table</span><span>API contract</span>
+              </div>
+              <b>→</b>
+              <div class="accent">
+                <small>INGESTION AGENT</small>
+                <strong>Semantic interpretation</strong>
+                <span>IR schema · invariants · closed vocabulary</span>
+              </div>
+              <b>→</b>
+              <div>
+                <small>VALIDATED OUTPUT</small>
+                <strong>Structured IR candidate</strong>
+                <span>Typed and traceable to source elements</span>
+              </div>
+            </div>
+            <h3 class="subsection-title">What the ingestion prompt contains</h3>
+            <div class="prompt-anatomy">
+              <article>
+                <span>01</span>
+                <h3>Role and output</h3>
+                <p>The exact semantic object to produce.</p>
+              </article>
+              <article>
+                <span>02</span>
+                <h3>Critical invariants</h3>
+                <p>Rules that must never be violated.</p>
+              </article>
+              <article>
+                <span>03</span>
+                <h3>Ordered reasoning passes</h3>
+                <p>A repeatable decomposition of the analysis.</p>
+              </article>
+              <article>
+                <span>04</span>
+                <h3>Closed vocabulary</h3>
+                <p>Allowed intentions and error categories.</p>
+              </article>
+              <article>
+                <span>05</span>
+                <h3>Empirical failure memory</h3>
+                <p>Known traps collected during migrations.</p>
+              </article>
+              <article>
+                <span>06</span>
+                <h3>Structured output</h3>
+                <p>Typed fields, fallback behaviour and an example.</p>
+              </article>
+            </div>
+            <h3 class="subsection-title">The seven IR layers</h3>
+            <div class="ir-layers">
+              <article>
+                <span>01</span>
+                <h3>Metadata</h3>
+                <p>Identity and traceability</p>
+              </article>
+              <article>
+                <span>02</span>
+                <h3>Triggers</h3>
+                <p>What starts the integration</p>
+              </article>
+              <article>
+                <span>03</span>
+                <h3>Security</h3>
+                <p>Authentication and authorisation</p>
+              </article>
+              <article>
+                <span>04</span>
+                <h3>Transformations</h3>
+                <p>Mappings and original scripts</p>
+              </article>
+              <article>
+                <span>05</span>
+                <h3>Effects</h3>
+                <p>Calls, writes and side effects</p>
+              </article>
+              <article>
+                <span>06</span>
+                <h3>Control</h3>
+                <p>Order, conditions and parallelism</p>
+              </article>
+              <article>
+                <span>07</span>
+                <h3>Errors</h3>
+                <p>Failures versus business responses</p>
+              </article>
+            </div>
+            <div class="design-rule">
+              <span>Key distinction</span>
+              <p>
+                A technical outage and an intentional business rejection may
+                both look like errors in a source platform, but they must not be
+                migrated with the same behaviour.
+              </p>
+            </div>
+            <div class="chapter-grid two ir-decisions">
+              <article>
+                <h3>Preserve original transformations</h3>
+                <p>
+                  Mapping scripts keep their original text and language instead
+                  of being reduced to a lossy natural-language summary.
+                </p>
+              </article>
+              <article>
+                <h3>Keep unknown information unknown</h3>
+                <p>
+                  Missing configuration and unresolved references remain
+                  explicit placeholders. The model does not invent replacements.
+                </p>
+              </article>
+            </div>
+          </section>
+
+          <section class="chapter" id="generation">
+            <p class="chapter-number">13 / Target subsystem</p>
+            <h2>
+              Generation: plan globally, generate locally, assemble
+              deterministically.
+            </h2>
+            <p class="chapter-lead">
+              The target subsystem combines specialised model calls with
+              deterministic validation, assembly and execution feedback.
+            </p>
+            <div class="case-stepper generation-stepper" data-case-stepper>
+              <div class="step-tabs" role="tablist">
+                <button type="button" class="step-tab" data-case-step-tab>
+                  Pipeline</button
+                ><button type="button" class="step-tab" data-case-step-tab>
+                  Planner</button
+                ><button type="button" class="step-tab" data-case-step-tab>
+                  RAG</button
+                ><button type="button" class="step-tab" data-case-step-tab>
+                  Developers</button
+                ><button type="button" class="step-tab" data-case-step-tab>
+                  Assembler</button
+                ><button type="button" class="step-tab" data-case-step-tab>
+                  Repair</button
+                ><button type="button" class="step-tab" data-case-step-tab>
+                  Manifest
+                </button>
+              </div>
+              <div class="step-panels">
+                <article class="step-panel" data-case-step-panel>
+                  <span>01 / OVERVIEW</span>
+                  <h3>The complete target-generation chain</h3>
+                  <p>
+                    The planner reads the whole IR, developer agents generate
+                    bounded components, and deterministic code controls the
+                    project structure. RAG supplies verified target knowledge
+                    where public documentation is insufficient.
+                  </p>
+                  <div class="generation-flow">
+                    <i>Canonical IR</i><b>→</b><i>Planner</i><b>→</b
+                    ><i>Developers</i><b>→</b><i>Assembler</i><b>→</b
+                    ><i>Compile / import</i><b>→</b><i>Manifest</i
+                    ><em>RAG ↗ planner + developers</em>
+                  </div>
+                  <div class="architecture-variant-grid">
+                    <figure class="technical-graph-figure">
+                      <img
+                        src="../assets/images/refactory/spring-generation-pipeline.png"
+                        alt="Complete Spring Boot generation pipeline from unified IR to compilation and repair"
+                      />
+                      <figcaption>
+                        Spring Boot target: planning, parallel endpoint
+                        generation, deterministic assembly, compilation and
+                        bounded repair.
+                      </figcaption>
+                    </figure>
+                    <figure class="technical-graph-figure">
+                      <img
+                        src="../assets/images/refactory/gai-generation-pipeline.png"
+                        alt="Complete Google Application Integration generation pipeline with RAG and deterministic assembly"
+                      />
+                      <figcaption>
+                        Google Application Integration target: catalogue-aware
+                        planning, RAG-grounded task generation and deterministic
+                        graph wiring.
+                      </figcaption>
+                    </figure>
+                  </div>
+                </article>
+                <article class="step-panel" data-case-step-panel>
+                  <span>02 / PLANNER</span>
+                  <h3>Decide the target architecture before writing code</h3>
+                  <p>
+                    The planner reads the complete IR once and produces an
+                    ordered list of target components and their connections. It
+                    must see the whole graph because routing and error wiring
+                    cannot be decided independently.
+                  </p>
+                  <figure class="embedded-figure technical-graph-figure">
+                    <img
+                      src="../assets/images/refactory/planner-technical.png"
+                      alt="Planner architecture with RAG lookup, deterministic validation and self-correction"
+                    />
+                    <figcaption>
+                      The planner proposes a target architecture, checks allowed
+                      syntax through the reference base and receives deterministic
+                      rejection feedback until the plan is compliant.
+                    </figcaption>
+                  </figure>
+                </article>
+                <article class="step-panel" data-case-step-panel>
+                  <span>03 / RETRIEVAL</span>
+                  <h3>Ground generation in verified platform examples</h3>
+                  <p>
+                    Google Application Integration exports were poorly
+                    represented in public documentation. I manually created
+                    useful components, exported valid JSON definitions and
+                    indexed them in ChromaDB. Semantic search retrieves the
+                    closest schemas and examples before generation.
+                  </p>
+                  <figure class="embedded-figure">
+                    <img
+                      src="../assets/images/refactory/rag-source.png"
+                      alt="RAG architecture using verified Google Application Integration exports"
+                    />
+                    <figcaption>
+                      Verified exports create a searchable component catalogue
+                      that grounds generation in platform evidence.
+                    </figcaption>
+                  </figure>
+                  <p>
+                    When prompt changes could not make request-parameter mapping
+                    reliable, I removed that responsibility from the model and
+                    reconstructed it deterministically from the API contract.
+                  </p>
+                </article>
+                <article class="step-panel" data-case-step-panel>
+                  <span>04 / DEVELOPERS</span>
+                  <h3>Generate bounded components in parallel</h3>
+                  <p>
+                    Each planned entry point becomes an independent generation
+                    request. This reduces context size, isolates failures and
+                    allows calls to run concurrently. Developers may reference
+                    shared artefacts but cannot redefine files owned by the
+                    assembler.
+                  </p>
+                  <figure class="embedded-figure technical-graph-figure vertical-graph">
+                    <img
+                      src="../assets/images/refactory/developer-technical.png"
+                      alt="Validated plan distributed to parallel developer agents producing isolated artefacts"
+                    />
+                    <figcaption>
+                      The validated plan is split into independent steps that can
+                      be generated simultaneously as isolated Java classes, JSON
+                      blocks or transformation scripts.
+                    </figcaption>
+                  </figure>
+                </article>
+                <article class="step-panel" data-case-step-panel>
+                  <span>05 / ASSEMBLER</span>
+                  <h3>Keep project integrity out of the model</h3>
+                  <p>
+                    The assembler generates build descriptors, configuration,
+                    entry classes, identifiers and global handlers. It connects
+                    units, removes unreachable elements and compares
+                    transformation fields to detect silent data loss.
+                  </p>
+                  <figure class="embedded-figure technical-graph-figure">
+                    <img
+                      src="../assets/images/refactory/assembler-technical.png"
+                      alt="Deterministic assembly phase from isolated artefacts to a complete target project"
+                    />
+                    <figcaption>
+                      The deterministic assembler assigns identifiers, generates
+                      global configuration, removes dead code and produces the
+                      complete source project or importable JSON.
+                    </figcaption>
+                  </figure>
+                </article>
+                <article class="step-panel" data-case-step-panel>
+                  <span>06 / REPAIR</span>
+                  <h3>Use concrete execution errors as feedback</h3>
+                  <p>
+                    For Apache Camel and Spring Boot, the project is compiled
+                    and started. If it fails, the repair agent receives the
+                    exact error and failing block. The loop stops after three
+                    attempts or when no progress is made.
+                  </p>
+                  <figure class="embedded-figure technical-graph-figure vertical-graph">
+                    <img
+                      src="../assets/images/refactory/repair-technical.png"
+                      alt="Bounded compilation and startup repair loop"
+                    />
+                    <figcaption>
+                      A failed startup is reduced to the affected route and stack
+                      trace before being returned to the developer agent.
+                    </figcaption>
+                  </figure>
+                  <p class="technical-note">
+                    The loop is bounded to three attempts and stops early when
+                    the correction does not produce meaningful progress.
+                  </p>
+                </article>
+                <article class="step-panel" data-case-step-panel>
+                  <span>07 / MANIFEST</span>
+                  <h3>Turn unresolved work into an explicit deliverable</h3>
+                  <p>
+                    Credentials, deployment endpoints and connector instances
+                    cannot be generated safely without the target environment.
+                    Refactory collects these placeholders together with planner
+                    warnings, unrepaired routes and validation findings.
+                  </p>
+                  <figure class="embedded-figure technical-graph-figure">
+                    <img
+                      src="../assets/images/refactory/manifest-technical.png"
+                      alt="Manifest generation from placeholders, planner warnings and unrepaired routes"
+                    />
+                    <figcaption>
+                      Post-generation signals are synthesised into required,
+                      recommended and optional migration actions.
+                    </figcaption>
+                  </figure>
+                  <p>
+                    The manifest preserves uncertainty instead of hiding it in
+                    generated code. A JSON version supports tooling, while a
+                    Markdown version gives the engineer a prioritised checklist.
+                  </p>
+                </article>
+              </div>
+              <div class="step-hint">Use the tabs or swipe the panel</div>
+            </div>
+          </section>
+
+          <section class="chapter" id="validation">
+            <p class="chapter-number">14 / Validation</p>
+            <h2>Observable behaviour is the final test.</h2>
+            <p class="chapter-lead">
+              A project that imports or compiles can still route the wrong
+              request, drop a transformed field or mishandle a failure.
+              Validation therefore covered structure, execution and behaviour.
+            </p>
+            <div class="validation-strategy">
+              <article>
+                <span>01</span>
+                <h3>Deterministic unit tests</h3>
+                <p>
+                  Test parsers, graph construction, ordering, symbol resolution,
+                  secret extraction, identifiers and assembly rules in isolation.
+                </p>
+              </article>
+              <article>
+                <span>02</span>
+                <h3>Structural comparison</h3>
+                <p>
+                  Check that source entities and logic appear in the generated
+                  artefact.
+                </p>
+              </article>
+              <article>
+                <span>03</span>
+                <h3>Import or execution</h3>
+                <p>
+                  Import proprietary artefacts or compile and start open-source
+                  targets.
+                </p>
+              </article>
+              <article>
+                <span>04</span>
+                <h3>Scenario replay</h3>
+                <p>
+                  Send the same API requests to source and target and compare
+                  responses.
+                </p>
+              </article>
+            </div>
+            <h3 class="subsection-title">
+              A capability-focused end-to-end suite
+            </h3>
+            <p>
+              I built twelve complete test applications with a colleague. Each
+              isolated one integration capability while still using a real
+              backend. This kept failures attributable without reducing the
+              evaluation to unit-level mocks.
+            </p>
+            <div class="capability-cloud">
+              <span>Data transformation</span><span>Content routing</span
+              ><span>Retries</span><span>Timeouts</span
+              ><span>Circuit breaker</span><span>Fallback</span
+              ><span>Idempotence</span><span>Parallel aggregation</span
+              ><span>Partial failures</span
+              ><span>Integration-layer authentication</span>
+            </div>
+            <div class="scenario-replay">
+              <div>
+                <small>SOURCE</small><strong>Original application</strong>
+              </div>
+              <b>same documented requests</b>
+              <div>
+                <small>TARGET</small><strong>Migrated application</strong>
+              </div>
+              <span
+                >Compare status codes · payloads · routes · transformations ·
+                error behaviour</span
+              >
+            </div>
+            <h3 class="subsection-title">
+              Observed results on the controlled suite
+            </h3>
+            <div class="metric-wall">
+              <article>
+                <strong>4</strong
+                ><span>platforms usable as source and target</span>
+              </article>
+              <article>
+                <strong>12</strong
+                ><span>end-to-end capability applications</span>
+              </article>
+              <article>
+                <strong>5–20 min</strong><span>migration execution time</span>
+              </article>
+              <article>
+                <strong>€0.01–€0.20</strong
+                ><span>model-call cost per tested project</span>
+              </article>
+              <article>
+                <strong>≈2</strong><span>repair attempts when required</span>
+              </article>
+              <article>
+                <strong>Configuration</strong
+                ><span>main remaining manual work</span>
+              </article>
+            </div>
+            <p>
+              The generated artefacts imported or compiled without structural
+              correction in nearly all controlled executions. Replayed scenarios
+              reproduced the expected status codes, content, routing,
+              transformations and error behaviour. Together, these results
+              demonstrate the feasibility of the architecture and provide a
+              concrete foundation for extending validation to additional project
+              patterns.
+            </p>
+          </section>
+
+          <section class="chapter" id="application">
+            <p class="chapter-number">15 / Implementation</p>
+            <h2>From an engineering pipeline to an operable application.</h2>
+            <p class="chapter-lead">
+              The first version ran through a CLI. I then built a local
+              application so a user could prepare, launch and inspect migrations
+              without operating the pipeline directly.
+            </p>
+            <div class="case-stepper app-stepper" data-case-stepper>
+              <div class="step-tabs" role="tablist">
+                <button type="button" class="step-tab" data-case-step-tab>
+                  Overview</button
+                ><button type="button" class="step-tab" data-case-step-tab>
+                  Batch run</button
+                ><button type="button" class="step-tab" data-case-step-tab>
+                  Project</button
+                ><button type="button" class="step-tab" data-case-step-tab>
+                  IR</button
+                ><button type="button" class="step-tab" data-case-step-tab>
+                  Manifest
+                </button>
+              </div>
+              <div class="step-panels">
+                <article class="step-panel" data-case-step-panel>
+                  <span>01 / MIGRATIONS OVERVIEW</span>
+                  <h3>Follow activity, status and model usage</h3>
+                  <p>
+                    The dashboard centralises previous migrations, their target
+                    platform, execution status, token consumption and estimated
+                    model cost.
+                  </p>
+                  <figure class="app-shot">
+                    <img
+                      src="../assets/images/refactory/app-dashboard.png"
+                      alt="Refactory migrations overview with status, token usage and cost"
+                    />
+                  </figure>
+                </article>
+                <article class="step-panel" data-case-step-panel>
+                  <span>02 / BATCH EXECUTION</span>
+                  <h3>Queue several projects with controlled concurrency</h3>
+                  <p>
+                    Users can submit multiple migrations, choose how many run at
+                    once and follow each project as it moves from scanning to
+                    parsing, planning, development, assembly, repair and manifest
+                    generation.
+                  </p>
+                  <figure class="app-shot">
+                    <img
+                      src="../assets/images/refactory/app-run.png"
+                      alt="Refactory batch execution view showing migration stages and concurrency"
+                    />
+                  </figure>
+                </article>
+                <article class="step-panel" data-case-step-panel>
+                  <span>03 / GENERATED PROJECT</span>
+                  <h3>Inspect the target before downloading it</h3>
+                  <p>
+                    The result view exposes the complete file tree and generated
+                    source code. Token usage, cost and migration status remain
+                    visible alongside the artefact.
+                  </p>
+                  <figure class="app-shot">
+                    <img
+                      src="../assets/images/refactory/app-result.png"
+                      alt="Refactory generated Spring Boot project and source code viewer"
+                    />
+                  </figure>
+                </article>
+                <article class="step-panel" data-case-step-panel>
+                  <span>04 / INTERMEDIATE REPRESENTATION</span>
+                  <h3>Keep the system's interpretation inspectable</h3>
+                  <p>
+                    The structured IR remains accessible so an engineer can
+                    inspect the application model and trace resolved properties
+                    or remaining placeholders before reviewing the generated
+                    target.
+                  </p>
+                  <figure class="app-shot">
+                    <img
+                      src="../assets/images/refactory/app-ir.png"
+                      alt="Refactory interface showing the structured intermediate representation"
+                    />
+                  </figure>
+                </article>
+                <article class="step-panel" data-case-step-panel>
+                  <span>05 / MIGRATION MANIFEST</span>
+                  <h3>Review what remains before deployment</h3>
+                  <p>
+                    The result includes machine-readable JSON and a Markdown
+                    checklist that separates blocking configuration from
+                    recommended verification and optional improvements.
+                  </p>
+                  <div class="manifest-preview">
+                    <div><small>REQUIRED</small><strong>2 actions</strong><span>Credentials · connector configuration</span></div>
+                    <div><small>RECOMMENDED</small><strong>Review</strong><span>Environment-specific routing and timeouts</span></div>
+                    <div><small>OPTIONAL</small><strong>Improvements</strong><span>Observability and deployment refinements</span></div>
+                  </div>
+                </article>
+              </div>
+              <div class="step-hint">Use the tabs or swipe the panel</div>
+            </div>
+            <div class="design-rule interface-access">
+              <span>Additional access</span>
+              <p>
+                The same workflow remained available through the command line
+                and an MCP server, allowing external tools or coding assistants
+                to trigger a migration and inspect its outputs.
+              </p>
+            </div>
+          </section>
+
+          <section class="chapter" id="technology">
+            <p class="chapter-number">16 / Technical stack</p>
+            <h2>Technologies chosen around explicit responsibilities.</h2>
+            <div class="technology-map">
+              <article>
+                <small>APPLICATION</small>
+                <h3>Python · FastAPI · HTML/CSS/JavaScript</h3>
+                <p>
+                  Pipeline orchestration, API layer and local web application.
+                </p>
+              </article>
+              <article>
+                <small>AI WORKFLOW</small>
+                <h3>LangChain · structured LLM outputs</h3>
+                <p>
+                  Prompted semantic stages, typed schemas and controlled model
+                  calls.
+                </p>
+              </article>
+              <article>
+                <small>RETRIEVAL</small>
+                <h3>ChromaDB · embeddings · RAG</h3>
+                <p>Semantic access to verified target-component examples.</p>
+              </article>
+              <article>
+                <small>PROGRAM ANALYSIS</small>
+                <h3>XML · JSON · Java parsing · graphs</h3>
+                <p>
+                  Repository parsing, reference resolution and topological
+                  ordering.
+                </p>
+              </article>
+              <article>
+                <small>TARGET ECOSYSTEMS</small>
+                <h3>MuleSoft · GAI · Camel · Spring Boot</h3>
+                <p>Four distinct integration and execution models.</p>
+              </article>
+              <article>
+                <small>VALIDATION</small>
+                <h3>Maven · curl · scenario replay</h3>
+                <p>Compilation, startup checks and behavioural comparison.</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="chapter" id="retrospective">
+            <p class="chapter-number">17 / Retrospective</p>
+            <h2>
+              What worked, what remains and where the architecture can go.
+            </h2>
+            <div class="retrospective-columns">
+              <article>
+                <span>WHAT WORKED</span>
+                <h3>A useful modular foundation</h3>
+                <ul>
+                  <li>
+                    The canonical IR separated source and target
+                    responsibilities.
+                  </li>
+                  <li>
+                    Deterministic controls reduced avoidable model variability.
+                  </li>
+                  <li>
+                    RAG grounded generation for the poorly documented format.
+                  </li>
+                  <li>
+                    The suite provided behavioural evidence through executable scenarios.
+                  </li>
+                  <li>
+                    Adding or reversing platform roles did not rewrite the core.
+                  </li>
+                </ul>
+              </article>
+              <article>
+                <span>NEXT ENGINEERING PRIORITIES</span>
+                <h3>Extend the existing foundation</h3>
+                <ul>
+                  <li>
+                    Automate source-versus-target scenario replay and comparison.
+                  </li>
+                  <li>
+                    Expand the verified component catalogues and connector
+                    coverage.
+                  </li>
+                  <li>
+                    Partition larger dependency graphs for incremental analysis
+                    and generation.
+                  </li>
+                  <li>Link diagnostics directly to source, IR and target nodes.</li>
+                  <li>Guide environment configuration without exposing secrets.</li>
+                </ul>
+              </article>
+            </div>
+            <h3 class="subsection-title">Next improvements</h3>
+            <div class="next-steps-map">
+              <span>Automated contract-test replay</span
+              ><span>Confidence per IR entity</span
+              ><span>Graph partitioning</span
+              ><span>Incremental regeneration</span
+              ><span>Connector compatibility catalogue</span
+              ><span>Human review workflow</span>
+            </div>
+            <p class="retrospective-close">
+              These improvements fit the existing architecture without a major
+              redesign. That capacity for extension was one of the main project
+              objectives.
+            </p>
+          </section>
+
+          <section class="chapter" id="learning">
+            <p class="chapter-number">18 / Personal reflection</p>
+            <h2>What I learned from building Refactory.</h2>
+            <p class="chapter-lead">
+              Refactory was the first project in which I had to design an AI
+              system across an entire engineering workflow. The work extended
+              beyond optimising one isolated model.
+            </p>
+            <div class="contribution-grid">
+              <article>
+                <span>01 / ARCHITECTURE</span>
+                <p>
+                  I learned to turn an open-ended problem into bounded
+                  subsystems with explicit contracts.
+                </p>
+              </article>
+              <article>
+                <span>02 / CRITICAL AI USE</span>
+                <p>
+                  I learned to remove responsibilities from the LLM when
+                  deterministic logic was more reliable.
+                </p>
+              </article>
+              <article>
+                <span>03 / EXPERIMENTATION</span>
+                <p>
+                  Reverse-engineering an undocumented format required systematic
+                  experiments and evidence-based conclusions.
+                </p>
+              </article>
+              <article>
+                <span>04 / VALIDATION</span>
+                <p>
+                  A generated artefact becomes useful once its behaviour has
+                  been compared with the source.
+                </p>
+              </article>
+              <article>
+                <span>05 / PRODUCTISATION</span>
+                <p>
+                  I moved from a technical pipeline to an interface with
+                  monitoring and inspectable outputs.
+                </p>
+              </article>
+              <article>
+                <span>06 / COMMUNICATION</span>
+                <p>
+                  I learned to explain architectural trade-offs and keep
+                  uncertainty visible in engineering terms.
+                </p>
+              </article>
+            </div>
+            <blockquote class="closing-learning">
+              The project strengthened my ability to combine AI methods,
+              software architecture and critical engineering judgement to solve
+              a complex transformation problem.
+            </blockquote>
+          </section>
+        </article>
+      </div>
+      <div class="next-project">
+        <a href="../index.html#projects">← All projects</a
+        ><a href="./data-scientist-copilot.html"
+          >Next: Data Scientist Copilot →</a
+        >
+      </div>
+    </main>
+    <footer>
+      <p>Mohamed Aziz Ben Taher</p>
+      <p>Refactory technical case study</p>
+      <p>© <span id="year">2026</span></p>
+    </footer>
+    <script src="../script.js"></script>
+  </body>
+</html>

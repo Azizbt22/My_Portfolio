@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Data Scientist Copilot V3: an evidence-first workflow for profiling tabular datasets, controlling prediction assumptions and producing reviewable analysis plans." />
+    <title>Data Scientist Copilot V3 | Aziz Ben Taher</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23030910'/%3E%3Cpath d='M14 46 28 17h8l14 29h-9l-3-7H25l-3 7zm14-14h8l-4-10z' fill='%2300d4ff'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="../v2.css" />
+  </head>
+  <body class="project-page refactory-page copilot-page">
+    <header class="site-header v2-header">
+      <a class="wordmark" href="../index.html"><span>AZIZ</span><small>AI · DATA · ENGINEERING</small></a>
+      <nav><a href="../index.html#about">About</a><a href="../index.html#journey">Journey</a><a href="../index.html#projects">Projects</a><a class="nav-cta" href="../index.html#contact">Contact</a></nav>
+    </header>
+    <div class="project-nav"><a href="../index.html#projects">← All projects</a><span>02 / 06</span></div>
+
+    <main class="refactory-main">
+      <section class="case-hero refactory-hero copilot-hero">
+        <p class="case-breadcrumb">Personal project · Applied AI &amp; data science</p>
+        <h1>Data Scientist<br />Copilot</h1>
+        <p class="case-intro">Upload a table, inspect what the data actually shows, then turn those findings into a modelling plan you can question and revise.</p>
+        <dl class="case-facts">
+          <div><dt>Input</dt><dd>Tabular datasets</dd></div>
+          <div><dt>Analysis</dt><dd>Profile, signals &amp; recommendations</dd></div>
+          <div><dt>Controls</dt><dd>Prediction contract</dd></div>
+          <div><dt>Output</dt><dd>Plan, baseline &amp; report</dd></div>
+        </dl>
+        <figure class="copilot-hero-media"><img src="../assets/images/copilot-v3/overview.png" alt="Copilot dataset overview showing the target distribution and data-quality signals" /><figcaption>From uploaded CSV to an inspectable overview of the dataset.</figcaption></figure>
+      </section>
+
+      <div class="case-study-layout">
+        <aside class="case-toc" aria-label="Case study navigation">
+          <p>Case study</p>
+          <a href="#need">The need</a><a href="#problem">Problem</a><a href="#objectives">Objectives</a><a href="#architecture">Architecture</a><a href="#evidence">Evidence engine</a><a href="#intelligence">AI boundary</a><a href="#journey">Product flow</a><a href="#case">Worked example</a><a href="#outcome">Outcome</a>
+        </aside>
+
+        <div class="case-study-content">
+          <section class="chapter" id="need">
+            <p class="chapter-number">01 / The need</p>
+            <h2>Every new dataset starts with the same questions.</h2>
+            <p class="chapter-lead">Before modelling, an analyst needs to understand what a row represents, how the target is distributed, which columns need attention and which features would really be available when a prediction is made.</p>
+            <p>That first pass is time consuming and easy to scatter across notebooks and notes. I built the copilot for analysts who want an organised starting point: a dataset profile, specific issues to review, a proposed analysis path and a record of the decisions made along the way.</p>
+            <p>The analyst supplies the context that a CSV cannot contain. For example, a highly predictive field might be useful input or an outcome generated after the event. The system surfaces that question with its supporting measurement so the analyst can decide.</p>
+          </section>
+
+          <section class="chapter" id="problem">
+            <p class="chapter-number">02 / Problem formulation</p>
+            <h2>Turn measurements into decisions without losing the evidence.</h2>
+            <p class="chapter-lead">The challenge is connecting each recommendation to a computed finding while keeping feature availability and the evaluation protocol visible to the analyst.</p>
+            <div class="challenge-table" role="table" aria-label="Data copilot engineering risks">
+              <div class="challenge-head" role="row"><span>Risk</span><span>What causes it</span><span>Consequence</span></div>
+              <article role="row"><h3><small>01</small>Unsupported claims</h3><p>The model fills gaps with patterns that sound statistically reasonable.</p><p>The report becomes fluent but cannot be audited against the data.</p></article>
+              <article role="row"><h3><small>02</small>Target leakage</h3><p>An identifier, downstream decision or post-outcome field is admitted as a predictor.</p><p>Offline performance looks strong and collapses when the model is deployed.</p></article>
+              <article role="row"><h3><small>03</small>Evaluation leakage</h3><p>Imputation, encoding or feature selection is fitted before the train/test split.</p><p>The test set influences training and the score becomes optimistic.</p></article>
+              <article role="row"><h3><small>04</small>Generic recommendations</h3><p>The same checklist is applied without considering task type, imbalance or feature availability.</p><p>The user receives more text, but no clearer decision.</p></article>
+            </div>
+          </section>
+
+          <section class="chapter" id="objectives">
+            <p class="chapter-number">03 / Objectives</p>
+            <h2>Build a copilot whose reasoning can be inspected.</h2>
+            <blockquote class="problem-statement">Compute a dependable evidence packet, make prediction assumptions explicit, generate a practical modelling plan and preserve the link between every recommendation and the fact that motivated it.</blockquote>
+            <div class="objective-table compact-objectives">
+              <article><span>01</span><div><h3>Grounding</h3><p>Statistics, counts and relationships come from deterministic code.</p></div><strong>Facts stay reproducible</strong></article>
+              <article><span>02</span><div><h3>Control</h3><p>The analyst approves the target, prediction point, feature set and split strategy.</p></div><strong>Assumptions stay explicit</strong></article>
+              <article><span>03</span><div><h3>Traceability</h3><p>Signals cite their measurement; actions cite the signals they answer.</p></div><strong>Advice can be challenged</strong></article>
+              <article><span>04</span><div><h3>Safe evaluation</h3><p>Preprocessing is fitted on training data and results come from executed baselines.</p></div><strong>Scores remain meaningful</strong></article>
+            </div>
+          </section>
+
+          <section class="chapter" id="architecture">
+            <p class="chapter-number">04 / Architecture</p>
+            <h2>One workflow from data to a reviewable plan.</h2>
+            <p class="chapter-lead">The architecture is organised around three artefacts: an evidence packet, a prediction contract and a reasoning report. Deterministic modules create and verify these artefacts. The language model works inside the context they define.</p>
+
+            <div class="copilot-architecture-map" aria-label="Data Scientist Copilot architecture">
+              <div class="architecture-lane lane-input"><small>INPUT &amp; CONTROL</small><strong>CSV + task definition</strong><span>Target · prediction point · sensitivity</span></div>
+              <b>↓</b>
+              <div class="architecture-split">
+                <article><small>DETERMINISTIC LAYER</small><strong>Profiler → target analysis → signal engine</strong><span>Typed facts, counts, distributions, risks and policy triggers</span></article>
+                <article><small>ANALYST CONTROL</small><strong>Prediction contract</strong><span>Approved features, split strategy and fields held for review</span></article>
+              </div>
+              <b>↓</b>
+              <div class="architecture-split">
+                <article class="ai"><small>MODEL-ASSISTED LAYER</small><strong>Understanding → plan → code draft → chat</strong><span>Structured reasoning from the bounded evidence context</span></article>
+                <article><small>EXECUTION LAYER</small><strong>Baseline + target-free exploration</strong><span>Train-only preprocessing, holdout metrics, clusters and anomalies</span></article>
+              </div>
+              <b>↓</b>
+              <div class="architecture-lane lane-output"><small>OUTPUT</small><strong>HTML / JSON report + reproducible artefacts</strong><span>Computed facts, heuristic signals, AI advice and measured outcomes remain distinguishable</span></div>
+            </div>
+
+            <div class="architecture-contracts">
+              <article><span>01 / EVIDENCE PACKET</span><h3>What the data says</h3><p>Dataset shape, column profiles, target statistics and named signals. Values are computed once and passed downstream as structured data.</p></article>
+              <article><span>02 / PREDICTION CONTRACT</span><h3>What the model is allowed to use</h3><p>The point of prediction, eligible features, exclusions, positive label and split policy become explicit inputs instead of hidden assumptions.</p></article>
+              <article><span>03 / REASONING REPORT</span><h3>What the system recommends</h3><p>Understanding, risks, preprocessing, models, evaluation choices, applied policies and validation warnings are saved together.</p></article>
+            </div>
+            <details class="secondary-shot"><summary>Open the full system diagram</summary><figure class="product-shot architecture-shot"><img src="../assets/images/copilot-v3/architecture.png" alt="Detailed architecture of Data Scientist Copilot V3" /><figcaption>The implementation view shows how the prediction contract governs both the model-assisted plan and the controlled evaluation path.</figcaption></figure></details>
+          </section>
+
+          <section class="chapter" id="evidence">
+            <p class="chapter-number">05 / Deterministic evidence engine</p>
+            <h2>The system establishes facts before asking for interpretation.</h2>
+            <p class="chapter-lead">Pandas-based profiling creates a typed description of the table. A separate target analyser determines whether the task is classification or regression and computes the target distribution. Signal rules then turn notable measurements into review items.</p>
+            <div class="component-ledger">
+              <article><span>PROFILE</span><h3>Column-level measurements</h3><p>Types, missing counts, cardinality, quantiles, skewness and distribution summaries.</p><code>DatasetProfile</code></article>
+              <article><span>TARGET</span><h3>Task ground truth</h3><p>Class counts, proportions and imbalance ratio, or regression range and dispersion.</p><code>TargetAnalysis</code></article>
+              <article><span>SIGNALS</span><h3>Review-worthy patterns</h3><p>ID-like columns, missingness, skewness, high cardinality, imbalance, constants, outliers and duplicates.</p><code>SignalCollection</code></article>
+              <article><span>POLICIES</span><h3>Actionable conventions</h3><p>Named rules connect signal types to recommendations such as excluding identifiers or using stratified evaluation.</p><code>Policy registry</code></article>
+            </div>
+            <div class="signal-anatomy"><div><span>MEASUREMENT</span><strong>Patient_ID is 100% unique</strong></div><b>→</b><div><span>SIGNAL</span><strong>Likely identifier · critical</strong></div><b>→</b><div><span>ACTION</span><strong>Exclude pending analyst review</strong></div></div>
+            <p>This separation matters because a signal is not a conclusion. A high-cardinality column is measurable; calling it unusable is a decision. The interface keeps the measurement, severity, related columns, metadata and recommendation visible as separate fields.</p>
+          </section>
+
+          <section class="chapter" id="intelligence">
+            <p class="chapter-number">06 / AI boundary and validation</p>
+            <h2>The model explains and plans; it does not create the evidence.</h2>
+            <p class="chapter-lead">The language model receives the detected signals, resolved task facts and applicable policies. It returns structured JSON for two jobs: understanding the dataset and proposing a modelling plan.</p>
+            <div class="ai-boundary-grid">
+              <article><span>AI IS USED FOR</span><ul><li>Summarising the evidence into a coherent dataset assessment</li><li>Connecting several signals into risks and priorities</li><li>Drafting preprocessing, modelling and evaluation choices</li><li>Explaining the saved report through contextual chat</li></ul></article>
+              <article><span>DETERMINISTIC CODE IS USED FOR</span><ul><li>Every statistic and target count shown as fact</li><li>Signal thresholds and policy selection</li><li>Checking referenced columns and allowed metric names</li><li>Executing preprocessing, baselines and evaluation</li></ul></article>
+            </div>
+            <p>The output validator checks structure, column references and metric names before the report is assembled. The chat agent receives a reduced JSON context containing the target analysis, top risks, modelling strategy, signals and policies. Its prompt requires it to cite computed numbers and say when information was not computed.</p>
+            <div class="copilot-separation"><span>COMPUTED</span><strong>Facts and measured outcomes</strong><i></i><span>HEURISTIC</span><strong>Signals and policy triggers</strong><i></i><span>MODEL-ASSISTED</span><strong>Interpretation and proposed actions</strong></div>
+          </section>
+
+          <section class="chapter" id="journey">
+            <p class="chapter-number">07 / Product flow</p>
+            <h2>The interface follows the decisions an analyst actually makes.</h2>
+            <p class="chapter-lead">The product starts with orientation, pauses for feature governance, then moves into planning and measurement. The generated code is a readable draft and is never silently executed.</p>
+            <div class="case-stepper" data-case-stepper>
+              <div class="step-tabs" role="tablist"><button class="step-tab" data-case-step-tab>Profile</button><button class="step-tab" data-case-step-tab>Contract</button><button class="step-tab" data-case-step-tab>Plan</button><button class="step-tab" data-case-step-tab>Measure</button><button class="step-tab" data-case-step-tab>Report</button></div>
+              <div class="step-panels">
+                <article class="step-panel" data-case-step-panel><span>01 / ORIENT</span><h3>Upload the table and inspect its evidence</h3><p>The overview establishes scale, target distribution and data-quality signals. The user can trace each flag back to the measurement that triggered it.</p></article>
+                <article class="step-panel" data-case-step-panel><span>02 / GOVERN</span><h3>Approve the prediction contract</h3><p>The analyst defines when the prediction is made and which columns exist at that moment. Identifiers and target proxies are excluded or held for explicit review.</p></article>
+                <article class="step-panel" data-case-step-panel><span>03 / PLAN</span><h3>Generate a dataset-specific strategy</h3><p>The plan covers preprocessing, a defensible baseline, candidate models, metrics and the implementation sequence. Each interpretation remains visible as a separate, expandable item.</p></article>
+                <article class="step-panel" data-case-step-panel><span>04 / VERIFY</span><h3>Run a controlled baseline</h3><p>The split happens before preprocessing. A pipeline is fitted on the training fold, then measured on the holdout with task-appropriate metrics and a dummy comparator.</p></article>
+                <article class="step-panel" data-case-step-panel><span>05 / COMMUNICATE</span><h3>Export and question the analysis</h3><p>The final report combines evidence, decisions, plots and measured results. Chat answers are grounded in the saved report rather than the full raw table.</p></article>
+              </div>
+              <div class="step-hint">Use the tabs or swipe the panel</div>
+            </div>
+            <figure class="product-shot"><img src="../assets/images/copilot-v3/plan.png" alt="Generated analysis plan showing interpretations and approved feature choices" /><figcaption>The plan view preserves exact class counts, exclusions and modelling assumptions instead of collapsing them into a generic recommendation.</figcaption></figure>
+            <details class="secondary-shot"><summary>See how the optional code draft documents deviations</summary><figure class="product-shot"><img src="../assets/images/copilot-v3/code-draft.png" alt="Code draft documenting how it follows the prediction contract" /><figcaption>The draft explains which contract choices it implements, which recommendations it leaves out and why. The user decides whether to run or adapt it.</figcaption></figure></details>
+          </section>
+
+          <section class="chapter" id="case">
+            <p class="chapter-number">08 / Worked example</p>
+            <h2>A strong predictor becomes a governance question.</h2>
+            <p class="chapter-lead">The demonstration uses a diabetes-risk dataset with 50,000 rows and 41 columns. The system detects 17 review signals, including four high-priority findings.</p>
+            <p>The overview shown above gives the analyst the target distribution and evidence summary before suggesting a model.</p>
+            <div class="case-highlight"><p>Detected relationship</p><h3>A recommendation field perfectly follows part of the target.</h3><span><code>AI_Health_Recommendation = Immediate Lifestyle Intervention</code> appears on 7,419 labelled rows. Every one belongs to the High diabetes-risk class.</span></div>
+            <figure class="product-shot"><img src="../assets/images/copilot-v3/signals.png" alt="Signal showing a strong relationship between AI Health Recommendation and the target" /><figcaption>The relationship is factual. Whether it is legitimate depends on when the field is produced.</figcaption></figure>
+            <p>If the recommendation is known before risk is assessed, it may be useful input. If it was generated from the risk assessment, it leaks the answer. The copilot cannot infer that chronology from a CSV, so the contract excludes the field pending review. This is the intended behaviour: surface the risk, show the evidence and ask for the missing domain fact.</p>
+          </section>
+
+          <section class="chapter" id="outcome">
+            <p class="chapter-number">09 / Outcome and next steps</p>
+            <h2>The prototype turns analysis into a reviewable process.</h2>
+            <p class="chapter-lead">The main result is the architecture itself: computed evidence, explicit prediction assumptions, bounded AI reasoning and controlled measurement coexist in one workflow. The user can see which statements are facts, which are heuristic warnings and which are recommendations.</p>
+            <div class="experience-grid">
+              <article><span>DELIVERABLE</span><h3>Structured analysis plan</h3><p>Preprocessing, baseline, candidate models, metrics and implementation steps tied to the dataset.</p></article>
+              <article><span>DELIVERABLE</span><h3>Measured baseline</h3><p>A leakage-aware pipeline, holdout results and a simple comparator establish whether the plan creates value.</p></article>
+              <article><span>DELIVERABLE</span><h3>Portable report</h3><p>HTML and JSON outputs preserve the evidence, rationale, artefacts and questions still requiring human judgement.</p></article>
+            </div>
+            <figure class="product-shot"><img src="../assets/images/copilot-v3/actions.png" alt="Structured recommendations generated from computed evidence" /><figcaption>Actions retain their rationale and the evidence that motivated them.</figcaption></figure>
+            <div class="scope-note"><strong>Current scope</strong><p>V3 is a working portfolio prototype tested across 21 synthetic scenarios. Representative public datasets and analyst review are the next steps to assess the usefulness of its recommendations and identify failure cases.</p></div>
+            <blockquote class="closing-learning">A useful copilot does not remove judgement. It gives judgement better inputs and leaves a trace of how the decision was reached.</blockquote>
+            <ul class="tech-list"><li>Python</li><li>Streamlit</li><li>Pandas</li><li>scikit-learn</li><li>Ollama</li><li>LangChain</li><li>Structured JSON</li><li>HTML reporting</li></ul>
+            <div class="document-links"><a href="https://github.com/Azizbt22/Data-Scientist-Copilot" target="_blank" rel="noreferrer">View earlier public implementation ↗</a></div>
+          </section>
+        </div>
+      </div>
+      <div class="next-project"><a href="./refactory.html">← Refactory</a><a href="./qoe-prediction.html">Next: Video QoE →</a></div>
+    </main>
+    <footer><p>Mohamed Aziz Ben Taher</p><p>Data Scientist Copilot V3 case study</p><p>© <span id="year">2026</span></p></footer>
+    <script src="../script.js"></script>
+  </body>
+</html>

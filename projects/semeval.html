@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="SemEval 2025 multi-label emotion detection with RoBERTa-large: preprocessing, model comparison, training, threshold tuning and error analysis." />
+    <title>SemEval Emotion Detection | Aziz Ben Taher</title>
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="../v2.css" />
+  </head>
+  <body class="project-page refactory-page research-case semeval-page">
+    <header class="site-header v2-header">
+      <a class="wordmark" href="../index.html"><span>AZIZ</span><small>AI · DATA · ENGINEERING</small></a>
+      <nav><a href="../index.html#about">About</a><a href="../index.html#journey">Journey</a><a href="../index.html#projects">Projects</a><a class="nav-cta" href="../index.html#contact">Contact</a></nav>
+    </header>
+    <div class="project-nav"><a href="../index.html#projects">← All projects</a><span>04 / 06</span></div>
+
+    <main class="refactory-main">
+      <section class="case-hero refactory-hero">
+        <p class="case-breadcrumb">NLP · SemEval 2025 Task 11-A · Team project</p>
+        <h1>Multi-label<br />emotion detection</h1>
+        <p class="case-intro">My work on a transformer-based system for recognising anger, fear, joy, sadness and surprise in short texts where several emotions may appear together.</p>
+        <dl class="case-facts">
+          <div><dt>Dataset</dt><dd>2,768 English texts</dd></div>
+          <div><dt>Models evaluated</dt><dd>5 transformers</dd></div>
+          <div><dt>Final model</dt><dd>RoBERTa-large</dd></div>
+          <div><dt>Test macro F1</dt><dd>0.7745</dd></div>
+        </dl>
+      </section>
+
+      <div class="case-study-layout">
+        <aside class="case-toc" aria-label="Case study navigation">
+          <p>Case study</p>
+          <a href="#context">Context</a><a href="#objective">Objective</a><a href="#preprocessing">Preprocessing</a><a href="#modeling">Modelling</a><a href="#training">Training</a><a href="#validation">Validation</a><a href="#results">Results</a><a href="#analysis">Error analysis</a><a href="#lessons">Lessons</a>
+        </aside>
+
+        <div class="case-study-content">
+          <section class="chapter" id="context">
+            <p class="chapter-number">01 / Context</p>
+            <h2>Emotion in language is rarely a single-label problem.</h2>
+            <p class="chapter-lead">Emotion detection can support social-media analysis, human-computer interaction and research on how people communicate. The SemEval shared task provides a common dataset and evaluation protocol for comparing approaches under the same conditions.</p>
+            <p>During my semester at TU Dresden, I participated in SemEval 2025 Task 11-A as part of a three-person team. My work focused on the model architecture, training experiments and analysis of the final predictions.</p>
+            <p>Each short text can express several emotions at once. A sentence may communicate fear and sadness together, or joy mixed with surprise. The output is therefore a set of five binary labels, not one mutually exclusive class.</p>
+            <div class="emotion-strip"><span>Anger</span><span>Fear</span><span>Joy</span><span>Sadness</span><span>Surprise</span></div>
+          </section>
+
+          <section class="chapter" id="objective">
+            <p class="chapter-number">02 / Objective and ML formulation</p>
+            <h2>Predict five labels from a small and imbalanced corpus.</h2>
+            <p class="chapter-lead">The English dataset contains 2,768 annotated texts. The labels are unevenly distributed: fear appears 1,611 times, while anger appears 333 times. The model must therefore learn from limited supervision without allowing frequent emotions to dominate evaluation.</p>
+            <blockquote class="problem-statement">Fine-tune a pretrained language model for multi-label emotion detection, compare several transformer architectures and select a configuration that performs consistently across all five emotions.</blockquote>
+            <div class="label-bars">
+              <div><span>Fear</span><i style="--v:100%"></i><b>1,611</b></div>
+              <div><span>Sadness</span><i style="--v:55%"></i><b>878</b></div>
+              <div><span>Surprise</span><i style="--v:52%"></i><b>839</b></div>
+              <div><span>Joy</span><i style="--v:42%"></i><b>674</b></div>
+              <div><span>Anger</span><i style="--v:21%"></i><b>333</b></div>
+            </div>
+            <div class="chapter-grid three">
+              <article><h3>Multi-label output</h3><p>Estimate one independent probability per emotion so several labels can be active.</p></article>
+              <article><h3>Balanced model selection</h3><p>Use macro F1 so each emotion contributes equally to the main score.</p></article>
+              <article><h3>Prediction analysis</h3><p>Inspect individual decisions to understand clear cues and systematic failures.</p></article>
+            </div>
+          </section>
+
+          <section class="chapter" id="preprocessing">
+            <p class="chapter-number">03 / Dataset and preprocessing</p>
+            <h2>Preserve the multi-label targets and test augmentation separately.</h2>
+            <p class="chapter-lead">I represented each target as a five-position binary vector. Texts were tokenised with the tokenizer associated with each transformer, padded in batches and truncated to a maximum length of 256 tokens.</p>
+            <div class="preprocessing-flow"><div><span>RAW TEXT</span><strong>Short English sentence</strong></div><b>→</b><div><span>TOKENISATION</span><strong>Subword token IDs + attention mask</strong></div><b>→</b><div><span>TARGET</span><strong>Five binary emotion indicators</strong></div></div>
+
+            <h3 class="subsection-title">Translation-based augmentation experiment</h3>
+            <p>The project also tested whether additional translated examples could compensate for the small training set. German SemEval texts were translated into English with DeepL. Examples containing the additional disgust category were removed, and the remaining translated data was added only to the training portion. Validation and test stayed in original English.</p>
+            <div class="dataset-compare">
+              <article><span>ORIGINAL ENGLISH</span><strong>2,768</strong><p>Official English examples used for the reference experiment.</p></article><b>+</b>
+              <article><span>TRANSLATED TRAINING DATA</span><strong>1,771</strong><p>German examples translated into English after removing disgust.</p></article><b>=</b>
+              <article><span>EXTENDED POOL</span><strong>4,539</strong><p>Used only to test the effect of augmentation.</p></article>
+            </div>
+            <div class="experiment-comparison">
+              <article><span>ORIGINAL DATA</span><h3>Selected for the final model</h3><p>Produced the stronger F1 result and avoided possible translation artefacts.</p></article>
+              <article><span>TRANSLATED AUGMENTATION</span><h3>Slightly lower performance</h3><p>More examples changed the label distribution and may have weakened emotional nuance during translation.</p></article>
+            </div>
+            <p>The augmentation result was an important negative finding. Increasing the number of examples did not improve the task when the added supervision was noisier and came from a shifted distribution.</p>
+          </section>
+
+          <section class="chapter" id="modeling">
+            <p class="chapter-number">04 / Model selection and architecture</p>
+            <h2>Compare contextual encoders before tuning the final system.</h2>
+            <p class="chapter-lead">I evaluated five pretrained transformer architectures. They cover different trade-offs between model capacity, contextual representation and inference cost.</p>
+            <div class="model-table" role="table" aria-label="Transformer model comparison">
+              <div class="model-row model-head" role="row"><span>Model</span><span>Average F1</span><span>Best F1</span><span>Lowest F1</span></div>
+              <div class="model-row selected" role="row"><strong>RoBERTa-large</strong><span>0.7553</span><span>0.7673</span><span>0.7397</span></div>
+              <div class="model-row" role="row"><strong>BERT-large-uncased</strong><span>0.7373</span><span>0.7509</span><span>0.7277</span></div>
+              <div class="model-row" role="row"><strong>DeBERTa-v3-base</strong><span>0.6995</span><span>0.7230</span><span>0.6721</span></div>
+              <div class="model-row" role="row"><strong>DistilRoBERTa-base</strong><span>0.6610</span><span>0.6639</span><span>0.6582</span></div>
+              <div class="model-row" role="row"><strong>ALBERT-base-v2</strong><span>0.6338</span><span>0.6703</span><span>0.6078</span></div>
+            </div>
+            <p>RoBERTa-large achieved the strongest average and maximum macro F1, so I retained it for the final experiments. BERT-large was the closest baseline. The smaller architectures reduced computation but left a clear performance gap on this corpus.</p>
+
+            <h3 class="subsection-title">Multi-label classification head</h3>
+            <div class="nlp-architecture" aria-label="Multi-label emotion model">
+              <article><span>01</span><strong>Tokenised text</strong><small>IDs and attention mask</small></article><b>→</b>
+              <article><span>02</span><strong>RoBERTa-large</strong><small>Contextual text representation</small></article><b>→</b>
+              <article><span>03</span><strong>Classification head</strong><small>Five output logits</small></article><b>→</b>
+              <article><span>04</span><strong>Sigmoid</strong><small>One probability per emotion</small></article><b>→</b>
+              <article><span>05</span><strong>Thresholds</strong><small>Final set of predicted labels</small></article>
+            </div>
+            <p>I trained the five outputs with binary cross-entropy. This treats each emotion as an independent binary decision and allows co-occurring labels. A softmax layer would force the probabilities to compete and would be incompatible with the task.</p>
+          </section>
+
+          <section class="chapter" id="training">
+            <p class="chapter-number">05 / Training protocol</p>
+            <h2>Keep validation separate and retain the best checkpoint.</h2>
+            <p class="chapter-lead">The English corpus was split into 80% training, 10% validation and 10% testing. I used validation performance for checkpoint and threshold selection. The test set remained untouched until the final evaluation.</p>
+            <div class="training-specs">
+              <article><span>MODEL</span><strong>RoBERTa-large</strong></article><article><span>BATCH SIZE</span><strong>16</strong></article><article><span>EPOCHS</span><strong>10 maximum</strong></article><article><span>LEARNING RATE</span><strong>2 × 10⁻⁵</strong></article><article><span>WEIGHT DECAY</span><strong>0.02</strong></article><article><span>GRADIENT CLIP</span><strong>0.5</strong></article><article><span>WARMUP</span><strong>50 steps</strong></article><article><span>SCHEDULER</span><strong>Linear decay</strong></article><article><span>MAX LENGTH</span><strong>256 tokens</strong></article>
+            </div>
+            <p>The model was evaluated after every epoch and the checkpoint with the highest validation macro F1 was saved. In the final training run, the selected checkpoint came from epoch five. Training loss continued to fall afterwards while validation loss followed a U-shaped curve, indicating that later epochs mainly increased overfitting.</p>
+          </section>
+
+          <section class="chapter" id="validation">
+            <p class="chapter-number">06 / Evaluation and threshold tuning</p>
+            <h2>Model selection and label decisions require different validation steps.</h2>
+            <p class="chapter-lead">Macro F1 was the primary metric because it gives equal weight to anger, fear, joy, sadness and surprise. I also monitored micro F1, precision, recall, accuracy and Hamming loss to obtain complementary views of prediction quality.</p>
+            <div class="threshold-flow"><div><span>TRAIN</span><strong>Optimise model parameters</strong></div><b>→</b><div><span>VALIDATE</span><strong>Select checkpoint and thresholds</strong></div><b>→</b><div><span>TEST</span><strong>Apply the frozen configuration once</strong></div></div>
+            <p>The initial decision threshold was 0.5 for every label. I then searched values from 0.1 to 0.9 on validation predictions. The best thresholds differed between emotions, ranging from 0.10 to 0.52 with a mean of 0.32. This reflects differences in label frequency and probability calibration.</p>
+            <div class="metric-explainers semeval-evaluation">
+              <article><span>MACRO F1</span><h3>Primary selection metric</h3><p>Computes F1 separately for each emotion and averages them with equal weight.</p></article>
+              <article><span>MICRO F1</span><h3>Overall label decisions</h3><p>Aggregates true and false predictions across every text-label pair.</p></article>
+              <article><span>HAMMING LOSS</span><h3>Label-level error rate</h3><p>Measures the proportion of individual emotion decisions that are incorrect.</p></article>
+              <article><span>PRECISION / RECALL</span><h3>Error trade-off</h3><p>Shows whether each label is over-predicted or missed too frequently.</p></article>
+            </div>
+          </section>
+
+          <section class="chapter" id="results">
+            <p class="chapter-number">07 / Results</p>
+            <h2>Final test macro F1: 0.7745.</h2>
+            <p class="chapter-lead">The final RoBERTa-large configuration used the original English training data, the best validation checkpoint and validation-tuned thresholds.</p>
+            <div class="metric-wall semeval-metrics">
+              <article><strong>0.7745</strong><span>Test macro F1</span></article>
+              <article><strong>5</strong><span>Emotion labels</span></article>
+              <article><strong>Epoch 5</strong><span>Selected checkpoint</span></article>
+              <article><strong>0.10–0.52</strong><span>Label thresholds</span></article>
+            </div>
+            <div class="results-reading">
+              <article><span>MODEL COMPARISON</span><h3>RoBERTa-large was consistently strongest</h3><p>It led both average and maximum macro F1 among the five tested transformer families.</p></article>
+              <article><span>DATA EXPERIMENT</span><h3>Translated augmentation did not improve F1</h3><p>The final system therefore used the smaller but cleaner original English corpus.</p></article>
+              <article><span>TRAINING DYNAMICS</span><h3>Early checkpointing prevented overfitting</h3><p>Validation performance stabilised while training loss continued to decrease.</p></article>
+            </div>
+          </section>
+
+          <section class="chapter" id="analysis">
+            <p class="chapter-number">08 / Explainability and error analysis</p>
+            <h2>SHAP showed both meaningful cues and brittle shortcuts.</h2>
+            <p class="chapter-lead">I used SHAP text explanations to inspect which tokens increased or decreased each emotion score. Applying a logit transformation made contributions easier to read in the generated visualisations.</p>
+            <div class="error-patterns">
+              <article><span>STRONG CASES</span><h3>Explicit emotional language</h3><p>Words such as “terrified” or “celebrate” produced clear and interpretable contributions.</p></article>
+              <article><span>AMBIGUITY</span><h3>Too little situational context</h3><p>Short statements sometimes supported several plausible interpretations.</p></article>
+              <article><span>IRONY AND SARCASM</span><h3>Literal wording contradicted intent</h3><p>The encoder often followed positive surface words in a sentence whose real meaning was negative.</p></article>
+              <article><span>NEGATION</span><h3>Emotion words dominated local context</h3><p>Expressions such as “not happy” could still activate joy because the cue received more weight than the negation.</p></article>
+            </div>
+            <p>The error analysis suggested different improvements for different failures: more diverse examples for rare expressions, contrastive training for negation, and additional conversational or multimodal context for irony and ambiguity.</p>
+          </section>
+
+          <section class="chapter" id="lessons">
+            <p class="chapter-number">09 / Limits and learnings</p>
+            <h2>The experimental protocol mattered as much as the encoder.</h2>
+            <div class="chapter-grid three">
+              <article><h3>Translation quality</h3><p>The translated examples were not manually assessed, so the precise source of their performance drop remains uncertain.</p></article>
+              <article><h3>Dataset size</h3><p>The test portion is small, which increases uncertainty around label-level conclusions.</p></article>
+              <article><h3>Missing context</h3><p>Some emotional meaning depends on speaker history, culture, tone or situation that the text alone does not contain.</p></article>
+            </div>
+            <blockquote class="closing-learning">The project taught me to treat data quality, checkpoint selection and decision thresholds as part of the model. A stronger encoder helps, but the final result depends on the complete experimental protocol.</blockquote>
+            <ul class="tech-list"><li>Python</li><li>PyTorch</li><li>Transformers</li><li>RoBERTa-large</li><li>SHAP</li><li>Hugging Face</li><li>CUDA</li></ul>
+            <div class="document-links"><a href="https://github.com/Azizbt22/SemEval-Task-11-A" target="_blank" rel="noreferrer">View public repository ↗</a></div>
+          </section>
+        </div>
+      </div>
+      <div class="next-project"><a href="./qoe-prediction.html">← Video QoE</a><a href="./radiomics.html">Next: Radiomics →</a></div>
+    </main>
+    <footer><p>Mohamed Aziz Ben Taher</p><p>SemEval case study</p><p>© <span id="year">2026</span></p></footer>
+    <script src="../script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="VeriRAG case study: a verification-aware RAG system evaluated across five small language models." />
+    <title>VeriRAG | Aziz Ben Taher</title>
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="../v2.css" />
+  </head>
+  <body class="project-page refactory-page research-case">
+    <header class="site-header v2-header">
+      <a class="wordmark" href="../index.html"><span>AZIZ</span><small>AI · DATA · ENGINEERING</small></a>
+      <nav><a href="../index.html#about">About</a><a href="../index.html#journey">Journey</a><a href="../index.html#projects">Projects</a><a class="nav-cta" href="../index.html#contact">Contact</a></nav>
+    </header>
+    <div class="project-nav"><a href="../index.html#projects">← All projects</a><span>06 / 06</span></div>
+    <main class="refactory-main">
+      <section class="case-hero refactory-hero">
+        <p class="case-breadcrumb">Academic team project · Reliable LLM systems · RAG</p>
+        <h1>VeriRAG</h1>
+        <p class="case-intro">A verification-aware retrieval system designed to test whether small language models can answer from evidence and abstain when that evidence is missing.</p>
+        <dl class="case-facts">
+          <div><dt>Corpus</dt><dd>11 documents</dd></div>
+          <div><dt>Index</dt><dd>237 chunks</dd></div>
+          <div><dt>Models</dt><dd>5 open models</dd></div>
+          <div><dt>Evaluation</dt><dd>24 questions</dd></div>
+        </dl>
+      </section>
+      <div class="case-study-layout">
+        <aside class="case-toc" aria-label="VeriRAG chapters">
+          <p>Case study</p>
+          <a href="#context">Context</a><a href="#challenges">Challenges</a><a href="#objectives">Objectives</a><a href="#design">Design choices</a><a href="#architecture">Architecture</a><a href="#data">Dataset</a><a href="#scoring">Scoring</a><a href="#results">Results</a><a href="#analysis">Analysis</a><a href="#limits">Limits</a>
+        </aside>
+        <div class="case-study-content">
+          <section class="chapter" id="context">
+            <p class="chapter-number">01 / Context</p>
+            <h2>Retrieval gives a model evidence. It does not guarantee faithfulness.</h2>
+            <p class="chapter-lead">A standard RAG system can retrieve a relevant passage and still add a fluent statement that the passage never supported.</p>
+            <p>The project studied grounded answering with small open models. The central question was whether structured prompting could improve faithfulness and refusal behaviour without fine-tuning.</p>
+            <div class="chapter-grid two">
+              <article><h3>Expected behaviour</h3><p>Answer from retrieved documents, expose claim-level support and refuse questions outside the corpus.</p></article>
+              <article><h3>Experimental question</h3><p>Does verification help every small model equally, and which model property predicts success?</p></article>
+            </div>
+          </section>
+          <section class="chapter" id="challenges">
+            <p class="chapter-number">02 / Reliability challenges</p>
+            <h2>Why grounded generation still fails.</h2>
+            <p class="chapter-lead">The system must coordinate retrieval, generation, verification and abstention. A failure at any stage can produce a confident unsupported answer.</p>
+            <div class="challenge-table" role="table" aria-label="RAG reliability challenges">
+              <div class="challenge-head" role="row"><span>Constraint</span><span>Mechanism</span><span>Impact</span></div>
+              <article role="row"><h3><small>01</small>Retrieval noise</h3><p>The closest chunks may be related to the query without containing the answer.</p><p>The model can treat topical similarity as evidence.</p></article>
+              <article role="row"><h3><small>02</small>Fluent hallucination</h3><p>Language models complete plausible statements from prior knowledge.</p><p>An answer can sound correct while exceeding the retrieved context.</p></article>
+              <article role="row"><h3><small>03</small>Answerability</h3><p>The system must detect when the corpus cannot answer the question.</p><p>A forced answer creates false confidence on out-of-domain queries.</p></article>
+              <article role="row"><h3><small>04</small>Evaluation</h3><p>Exact lexical overlap penalises valid paraphrases; semantic similarity can accept vague claims.</p><p>Faithfulness needs complementary signals and calibrated thresholds.</p></article>
+            </div>
+          </section>
+          <section class="chapter" id="objectives">
+            <p class="chapter-number">03 / Objectives and constraints</p>
+            <h2>Improve faithfulness with prompting alone.</h2>
+            <p class="chapter-lead">The experiment isolates the effect of a verification-aware prompt architecture across five small models under the same retrieval and evaluation conditions.</p>
+            <div class="objective-table compact-objectives">
+              <article><span>01</span><div><h3>Grounded answers</h3><p>Generate responses using only the retrieved evidence.</p></div><strong>Claim support</strong></article>
+              <article><span>02</span><div><h3>Reliable abstention</h3><p>Refuse questions whose answer is absent from the corpus.</p></div><strong>Out-of-domain control</strong></article>
+              <article><span>03</span><div><h3>Comparable models</h3><p>Keep retrieval, questions and metrics constant across all five models.</p></div><strong>Controlled experiment</strong></article>
+              <article><span>04</span><div><h3>No training</h3><p>Use prompt engineering so the method remains inexpensive and reproducible.</p></div><strong>Zero fine-tuning</strong></article>
+              <article><span>05</span><div><h3>Inspectable verdicts</h3><p>Decompose answers into claims and score support at claim level.</p></div><strong>Transparent evaluation</strong></article>
+            </div>
+          </section>
+          <section class="chapter" id="design">
+            <p class="chapter-number">04 / Design choices</p>
+            <h2>One model, several explicit roles.</h2>
+            <p class="chapter-lead">A single underlying LLM performs planning, grounded generation and claim verification through separate structured prompts.</p>
+            <div class="design-principles qoe-design">
+              <article><span>01 / Shared model</span><h3>Control cost and comparison</h3><p>Every role uses the same candidate model, making model behaviour the main experimental variable.</p></article>
+              <article><span>02 / Explicit roles</span><h3>Separate planning, answering and checking</h3><p>Role boundaries improve inspection and make failure analysis more precise.</p></article>
+              <article><span>03 / Evidence constraint</span><h3>Close generation around retrieved text</h3><p>The answer prompt requires support from the supplied context and includes an abstention path.</p></article>
+              <article><span>04 / Claim-level checks</span><h3>Evaluate atomic statements</h3><p>Individual claims reveal partial support that one answer-level similarity score would hide.</p></article>
+            </div>
+          </section>
+          <section class="chapter" id="architecture">
+            <p class="chapter-number">05 / Architecture</p>
+            <h2>The verification-aware RAG workflow.</h2>
+            <p class="chapter-lead">The question passes through five responsibilities. Each stage leaves an output that can be inspected independently.</p>
+            <div class="system-map verirag-map">
+              <article class="system-stage"><small>01 / PLAN</small><strong>Query planner</strong><span>Check answerability and frame retrieval intent.</span></article>
+              <article class="system-stage"><small>02 / RETRIEVE</small><strong>FAISS search</strong><span>Return the four closest passages.</span></article>
+              <article class="system-stage"><small>03 / GENERATE</small><strong>Answer writer</strong><span>Respond from retrieved context.</span></article>
+              <article class="system-stage"><small>04 / DECOMPOSE</small><strong>Claim extractor</strong><span>Split the answer into atomic facts.</span></article>
+              <article class="system-stage"><small>05 / VERIFY</small><strong>Claim scorer</strong><span>Measure support and assign a verdict.</span></article>
+            </div>
+          </section>
+          <section class="chapter" id="data">
+            <p class="chapter-number">06 / Dataset and protocol</p>
+            <h2>A small benchmark built to expose failure modes.</h2>
+            <p class="chapter-lead">The corpus contains six machine-learning articles and five physics articles. Five unrelated questions test whether the system refuses unsupported requests.</p>
+            <div class="chapter-grid three">
+              <article><h3>237 chunks</h3><p>Documents were segmented into 500-word chunks with a 50-word overlap.</p></article>
+              <article><h3>384 dimensions</h3><p>MiniLM embeddings were indexed with exact FAISS Flat L2 search.</p></article>
+              <article><h3>24 questions</h3><p>Eleven easy, eight medium and five out-of-domain questions.</p></article>
+            </div>
+            <table class="data-table">
+              <thead><tr><th>Model</th><th>Parameters</th><th>Training focus</th></tr></thead>
+              <tbody>
+                <tr><td>Qwen 2.5 Instruct</td><td>1.5B</td><td>Instruction following</td></tr>
+                <tr><td>Llama 3.2 Instruct</td><td>1B</td><td>Instruction following</td></tr>
+                <tr><td>Llama 3.2 Instruct</td><td>3B</td><td>Instruction following</td></tr>
+                <tr><td>Phi-2</td><td>2.7B</td><td>Code focused</td></tr>
+                <tr><td>TinyLlama Chat</td><td>1.1B</td><td>General chat</td></tr>
+              </tbody>
+            </table>
+          </section>
+          <section class="chapter" id="scoring">
+            <p class="chapter-number">07 / Faithfulness scoring</p>
+            <h2>Combine semantic and lexical evidence.</h2>
+            <p class="chapter-lead">Each extracted claim is compared with the retrieved context through five complementary metrics.</p>
+            <div class="score-formula"><span>35% semantic similarity</span><span>25% ROUGE-L</span><span>20% ROUGE-2</span><span>10% BLEU</span><span>10% word overlap</span></div>
+            <div class="chapter-grid two">
+              <article><h3>Claim support</h3><p>A combined score of 0.18 or above marks a claim as supported. The threshold was tuned to accept paraphrases.</p></article>
+              <article><h3>Answer verdict</h3><p>PASS begins at 0.40 faithfulness, PARTIAL at 0.25, FAIL below 0.25. A valid refusal receives ABSTAIN.</p></article>
+            </div>
+          </section>
+          <section class="chapter" id="results">
+            <p class="chapter-number">08 / Results</p>
+            <h2>Instruction tuning mattered more than parameter count.</h2>
+            <p class="chapter-lead">Llama 3.2 3B achieved the strongest absolute faithfulness. Qwen 2.5 1.5B achieved the largest improvement and perfect out-of-domain abstention.</p>
+            <table class="data-table">
+              <thead><tr><th>Model</th><th>Vanilla</th><th>VeriRAG</th><th>Change</th><th>OOD abstention</th></tr></thead>
+              <tbody>
+                <tr><td>Qwen 2.5 1.5B</td><td>75.9%</td><td>92.1%</td><td>+21.4%</td><td>5 / 5</td></tr>
+                <tr><td>Llama 3.2 3B</td><td>81.3%</td><td>92.8%</td><td>+14.1%</td><td>5 / 5</td></tr>
+                <tr><td>Llama 3.2 1B</td><td>81.5%</td><td>82.6%</td><td>+1.4%</td><td>2 / 5</td></tr>
+                <tr><td>Phi-2</td><td>81.9%</td><td>69.7%</td><td>−15.0%</td><td>1 / 5</td></tr>
+                <tr><td>TinyLlama</td><td>29.2%</td><td>12.0%</td><td>−17.2%</td><td>Not reported</td></tr>
+              </tbody>
+            </table>
+          </section>
+          <section class="chapter" id="analysis">
+            <p class="chapter-number">09 / Interpretation</p>
+            <h2>The architecture depends on instruction-following ability.</h2>
+            <p class="chapter-lead">Qwen 1.5B gained 21.4 points while the larger code-focused Phi-2 lost 15 points. Model size did not explain the difference.</p>
+            <div class="chapter-grid three">
+              <article><h3>Meta-instructions matter</h3><p>Verification requires a model to follow staged instructions, assess support and choose abstention.</p></article>
+              <article><h3>Baseline affects gain</h3><p>The strongest improvements appeared where vanilla faithfulness left more room for correction.</p></article>
+              <article><h3>Verification has a cost</h3><p>Planning, generation and checking require three model passes for every question.</p></article>
+            </div>
+            <blockquote class="closing-learning">Self-verification is a model capability to evaluate experimentally, not a guarantee created by adding a prompt.</blockquote>
+          </section>
+          <section class="chapter" id="limits">
+            <p class="chapter-number">10 / Limits and next tests</p>
+            <h2>Strong controlled results with a narrow scope.</h2>
+            <p class="chapter-lead">The experiment used a small English corpus, five compact models and empirically tuned thresholds. The result describes this controlled setting.</p>
+            <div class="chapter-grid three">
+              <article><h3>Broader corpora</h3><p>Test multilingual and high-stakes domains with more varied document structures.</p></article>
+              <article><h3>Larger models</h3><p>Measure whether explicit verification still helps models above three billion parameters.</p></article>
+              <article><h3>Stronger calibration</h3><p>Tune thresholds on a held-out set and add human faithfulness judgements.</p></article>
+            </div>
+            <ul class="tech-list"><li>Python</li><li>Transformers</li><li>Sentence Transformers</li><li>FAISS</li><li>ROUGE</li><li>BLEU</li></ul>
+            <div class="document-links"><a href="https://github.com/Azizbt22/VeriRAG" target="_blank" rel="noreferrer">View public repository ↗</a><a href="../reports/verirag-report.pdf" target="_blank">Read project report ↗</a></div>
+          </section>
+        </div>
+      </div>
+      <div class="next-project"><a href="./radiomics.html">← Radiomics</a><a href="../index.html#projects">Back to all projects →</a></div>
+    </main>
+    <footer><p>Mohamed Aziz Ben Taher</p><p>VeriRAG case study</p><p>© <span id="year">2026</span></p></footer>
+    <script src="../script.js"></script>
+  </body>
+</html>

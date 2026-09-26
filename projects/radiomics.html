@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="Radiomics machine-learning methodology for clinical decision-support research, including feature selection, validation and recurrent-error analysis." />
+    <title>Radiomics Research | Aziz Ben Taher</title>
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="../v2.css" />
+  </head>
+  <body class="project-page refactory-page research-case radiomics-page">
+    <header class="site-header v2-header">
+      <a class="wordmark" href="../index.html"><span>AZIZ</span><small>AI · DATA · ENGINEERING</small></a>
+      <nav><a href="../index.html#about">About</a><a href="../index.html#journey">Journey</a><a href="../index.html#projects">Projects</a><a class="nav-cta" href="../index.html#contact">Contact</a></nav>
+    </header>
+    <div class="project-nav"><a href="../index.html#projects">← All projects</a><span>05 / 06</span></div>
+
+    <main class="refactory-main">
+      <section class="case-hero refactory-hero">
+        <p class="case-breadcrumb">Clinical research internship · Machine learning · Radiomics</p>
+        <h1>Radiomics<br />research</h1>
+        <p class="case-intro">A machine-learning study designed to compare radiomic signatures, evaluate their stability and understand which observations remain difficult across repeated experiments.</p>
+        <dl class="case-facts">
+          <div><dt>Users</dt><dd>Clinical researchers</dd></div>
+          <div><dt>Input</dt><dd>Radiomic descriptors</dd></div>
+          <div><dt>Focus</dt><dd>ML methodology</dd></div>
+          <div><dt>Priority</dt><dd>Reliable validation</dd></div>
+        </dl>
+      </section>
+
+      <div class="case-study-layout">
+        <aside class="case-toc" aria-label="Case study navigation">
+          <p>Case study</p>
+          <a href="#context">Clinical context</a><a href="#radiomics">Radiomics</a><a href="#objectives">Objectives</a><a href="#preparation">Data preparation</a><a href="#selection">Feature selection</a><a href="#modeling">Modelling</a><a href="#validation">Validation</a><a href="#errors">Error analysis</a><a href="#lessons">Lessons</a>
+        </aside>
+
+        <div class="case-study-content">
+          <section class="chapter" id="context">
+            <p class="chapter-number">01 / Clinical context</p>
+            <h2>Medical images contain information that is difficult to assess consistently.</h2>
+            <p class="chapter-lead">Reading an image requires expertise, time and judgement. Some lesions have similar visual appearances, and subtle differences can be difficult to characterise from observation alone.</p>
+            <p>The consequences of an error can be serious. A false negative may delay the diagnosis and treatment of a dangerous condition. A false positive may lead to additional examinations, anxiety or an avoidable invasive procedure. The objective of predictive modelling in this setting is therefore not to replace the clinician. It is to provide additional quantitative evidence that can support a decision.</p>
+            <p>A future decision-support tool could help radiologists, physicians and clinical researchers compare a new case with patterns learned from previously analysed images. Its usefulness depends on more than a high average score: the model must be evaluated carefully, its errors must remain visible and the clinical trade-off between missed cases and unnecessary interventions must be understood.</p>
+            <div class="clinical-error-grid">
+              <article><span>FALSE NEGATIVE</span><h3>A relevant lesion is missed</h3><p>Potential consequence: delayed diagnosis, monitoring or treatment.</p></article>
+              <article><span>FALSE POSITIVE</span><h3>A benign case is flagged</h3><p>Potential consequence: additional examinations or an unnecessary invasive procedure.</p></article>
+              <article><span>DECISION SUPPORT</span><h3>The model adds evidence</h3><p>The final interpretation remains the responsibility of qualified healthcare professionals.</p></article>
+            </div>
+          </section>
+
+          <section class="chapter" id="radiomics">
+            <p class="chapter-number">02 / What radiomics does</p>
+            <h2>Turn an image region into quantitative data.</h2>
+            <p class="chapter-lead">Radiomics extracts a large set of numerical descriptors from a segmented region of interest. These descriptors capture properties that may not be easy to quantify visually and make the image compatible with a conventional machine-learning pipeline.</p>
+            <div class="radiomics-methodology" aria-label="Radiomics methodology">
+              <article><span>01</span><strong>Medical imaging</strong><small>An examination produces a CT, MRI or PET image.</small></article><b>→</b>
+              <article><span>02</span><strong>Segmentation</strong><small>The region of interest is delineated in two or three dimensions.</small></article><b>→</b>
+              <article><span>03</span><strong>Feature extraction</strong><small>Software quantifies shape, intensity and texture.</small></article><b>→</b>
+              <article class="focus"><span>04 · MY ML SCOPE</span><strong>Statistical learning</strong><small>Select features, train models and evaluate reliability.</small></article><b>→</b>
+              <article><span>05</span><strong>Decision evidence</strong><small>A prediction and its uncertainty can inform clinical review.</small></article>
+            </div>
+            <div class="radiomics-feature-types">
+              <article><span>SHAPE</span><h3>Morphology</h3><p>Volume, compactness, elongation and other geometric properties of the segmented region.</p></article>
+              <article><span>INTENSITY</span><h3>Voxel distribution</h3><p>Summary statistics describing how signal values are distributed inside the region.</p></article>
+              <article><span>TEXTURE</span><h3>Spatial organisation</h3><p>Patterns that describe homogeneity, contrast and relationships between neighbouring voxels.</p></article>
+            </div>
+            <p>The extraction stage can produce many correlated variables for a limited number of observations. The machine-learning question is therefore not only which classifier performs well. It is also which compact signature is stable enough to justify that performance.</p>
+          </section>
+
+          <section class="chapter" id="objectives">
+            <p class="chapter-number">03 / Research objectives</p>
+            <h2>Evaluate complete pipelines and study where they fail.</h2>
+            <p class="chapter-lead">I worked on the machine-learning stage using radiomic tables from several lesion cohorts. The study compared feature-selection methods, classifiers and signature sizes under a consistent validation protocol.</p>
+            <blockquote class="problem-statement">Which combinations of selected radiomic features and classifiers produce stable discrimination, and what can repeatedly misclassified observations reveal about the model’s limits?</blockquote>
+            <div class="objective-table compact-objectives">
+              <article><span>01</span><div><h3>Compare pipelines</h3><p>Evaluate selection and classification choices under the same protocol.</p></div><strong>Fair comparison</strong></article>
+              <article><span>02</span><div><h3>Control overfitting</h3><p>Keep preprocessing and feature selection inside validation.</p></div><strong>Protected test data</strong></article>
+              <article><span>03</span><div><h3>Measure stability</h3><p>Repeat evaluation across resamples instead of trusting one favourable split.</p></div><strong>Visible uncertainty</strong></article>
+              <article><span>04</span><div><h3>Analyse errors</h3><p>Identify observations that remain difficult across many fitted models.</p></div><strong>Patient-level insight</strong></article>
+            </div>
+          </section>
+
+          <section class="chapter" id="preparation">
+            <p class="chapter-number">04 / Data preparation</p>
+            <h2>Protect patient separation throughout the experiment.</h2>
+            <p class="chapter-lead">The modelling input is a table: one observation per case, many radiomic descriptors and a binary outcome. Cleaning, scaling and selection must learn exclusively from the training portion of each split.</p>
+            <div class="research-protocol">
+              <article><span>CHECK</span><h3>Data consistency</h3><p>Inspect types, missing values, constant variables and invalid measurements before modelling.</p></article>
+              <article><span>SEPARATE</span><h3>Training and held-out cases</h3><p>Preserve independent evaluation units and prevent the same case from influencing both sides.</p></article>
+              <article><span>FIT</span><h3>Preprocessing inside each fold</h3><p>Estimate transformations and selected features from training data, then apply them to validation data.</p></article>
+            </div>
+            <div class="leakage-rule"><span>CORE RULE</span><strong>Held-out observations must never influence the radiomic signature.</strong><p>If selection sees the complete dataset, the validation score already contains information from the cases it claims to predict independently.</p></div>
+          </section>
+
+          <section class="chapter" id="selection">
+            <p class="chapter-number">05 / Feature selection</p>
+            <h2>Different selectors define relevance differently.</h2>
+            <p class="chapter-lead">Radiomic features are numerous and often correlated. I compared several selection families because no single method captures every useful relationship between a descriptor and the clinical outcome.</p>
+            <div class="selector-families">
+              <article><span>STATISTICAL ASSOCIATION</span><h3>Chi², Pearson, Spearman and Cramér’s V</h3><p>Rank features through linear, monotonic or categorical association with the outcome.</p><small>Fast and interpretable, but largely univariate.</small></article>
+              <article><span>MODEL-BASED IMPORTANCE</span><h3>Random Forest importance</h3><p>Use nonlinear tree splits to identify variables that help separate the classes.</p><small>Captures interactions, but importance may be unstable between correlated variables.</small></article>
+              <article><span>INFORMATION THEORY</span><h3>MIM, MRMR and JMI</h3><p>Measure information shared with the target while controlling redundancy between selected variables.</p><small>Useful for building compact signatures from overlapping descriptors.</small></article>
+            </div>
+            <p>Each selector was evaluated with several signature sizes. The selector, number of retained variables and classifier formed one complete candidate pipeline. This is important because a feature subset that suits a sparse linear model may not be the best subset for a nonlinear ensemble.</p>
+          </section>
+
+          <section class="chapter" id="modeling">
+            <p class="chapter-number">06 / Modelling strategy</p>
+            <h2>Compare assumptions, not only algorithms.</h2>
+            <p class="chapter-lead">The candidate models covered sparse linear relationships, nonlinear decision boundaries and ensemble learning. Every model received features selected inside the same validation framework.</p>
+            <div class="model-family-grid">
+              <article><span>LINEAR</span><h3>Regularised logistic regression</h3><p>L1, L2 and ElasticNet penalties control complexity and provide coefficients that can be inspected.</p></article>
+              <article><span>KERNEL</span><h3>Support Vector Machine</h3><p>Tests whether a nonlinear boundary can separate the classes in the selected feature space.</p></article>
+              <article><span>ENSEMBLE</span><h3>Random Forest</h3><p>Captures nonlinear interactions and supplies complementary feature-importance estimates.</p></article>
+              <article><span>ENSEMBLE</span><h3>Gradient Boosting</h3><p>Builds a sequence of trees that concentrates on the errors made by earlier stages.</p></article>
+            </div>
+            <p>Hyperparameters and feature choices were selected through internal cross-validation. The final comparison used held-out observations that had not participated in preprocessing, feature selection or tuning.</p>
+          </section>
+
+          <section class="chapter" id="validation">
+            <p class="chapter-number">07 / Validation and clinical metrics</p>
+            <h2>A useful score must reflect both kinds of clinical error.</h2>
+            <p class="chapter-lead">Repeated validation was used to estimate how much performance changed with the sampled observations. Run-level predictions were retained so that average discrimination, variability and recurrent mistakes could all be studied.</p>
+            <div class="validation-flow"><div><span>OUTER SPLIT</span><strong>Hold out independent cases</strong></div><b>→</b><div><span>INNER VALIDATION</span><strong>Select features, model and parameters</strong></div><b>→</b><div><span>HELD-OUT EVALUATION</span><strong>Measure predictions once</strong></div><b>→</b><div><span>REPEAT</span><strong>Estimate stability across resamples</strong></div></div>
+            <div class="metric-explainers">
+              <article><span>ROC CURVE</span><h3>Explore every decision threshold</h3><p>The curve compares sensitivity with the false-positive rate. It shows how catching more positive cases changes the number of false alarms.</p></article>
+              <article><span>AREA UNDER THE CURVE</span><h3>Measure ranking quality</h3><p>AUC estimates how often a positive case receives a higher score than a negative case, independently of one fixed threshold.</p></article>
+              <article><span>SENSITIVITY</span><h3>Control missed positive cases</h3><p>Especially important when a false negative could delay diagnosis or treatment.</p></article>
+              <article><span>SPECIFICITY</span><h3>Control unnecessary alerts</h3><p>Especially important when a false positive could lead to avoidable examinations or procedures.</p></article>
+            </div>
+            <p>No metric can choose the clinical operating point by itself. The appropriate threshold depends on how the intended use values false negatives and false positives. That decision requires clinical expertise and prospective validation.</p>
+          </section>
+
+          <section class="chapter" id="errors">
+            <p class="chapter-number">08 / Recurrent-error analysis</p>
+            <h2>Some observations remained difficult across many models.</h2>
+            <p class="chapter-lead">For every held-out observation, I counted how frequently repeated runs produced an incorrect prediction. Cases with a high error frequency formed a difficult subgroup for further analysis.</p>
+            <div class="error-loop"><div><strong>Repeat the pipeline</strong><span>new resamples and fitted models</span></div><b>→</b><div><strong>Retain predictions</strong><span>one history per observation</span></div><b>→</b><div><strong>Count recurring errors</strong><span>identify difficult cases</span></div><b>→</b><div><strong>Stress-test performance</strong><span>vary subgroup prevalence</span></div></div>
+            <div class="chapter-grid three">
+              <article><h3>Subgroup performance</h3><p>Compare discrimination on the complete sample and on easier or more difficult observations.</p></article>
+              <article><h3>Difficulty prediction</h3><p>Test whether radiomic descriptors can characterise cases that the main classifier handles inconsistently.</p></article>
+              <article><h3>Bootstrap stress test</h3><p>Change the proportion of difficult cases and observe how sensitive overall performance is to cohort composition.</p></article>
+            </div>
+            <p>This analysis changes the interpretation of a model. A stable average AUC can coexist with a subgroup that is repeatedly misclassified. Studying those cases can reveal overlapping phenotypes, insufficient features, uncertain labels or a population that requires a different modelling strategy.</p>
+          </section>
+
+          <section class="chapter" id="lessons">
+            <p class="chapter-number">09 / Lessons and publication scope</p>
+            <h2>Reliability comes from the protocol, not one winning score.</h2>
+            <p class="chapter-lead">The central lesson was to treat preprocessing, feature selection, modelling and validation as one pipeline. In a small clinical cohort, the apparent winner can change with the split, the selected signature or a small number of difficult observations.</p>
+            <blockquote class="closing-learning">The strongest model is not simply the one with the highest average AUC. It is the one whose performance, errors and limitations remain understandable across repeated evaluations.</blockquote>
+            <div class="scope-note"><strong>Publication scope</strong><p>This portfolio describes the non-confidential methodology and my machine-learning work. It does not publish patient data, medical images, cohort-specific results, proprietary implementation details or clinical claims.</p></div>
+            <ul class="tech-list"><li>Python</li><li>scikit-learn</li><li>Radiomics</li><li>Feature selection</li><li>Cross-validation</li><li>ROC analysis</li><li>Bootstrap</li><li>Error analysis</li></ul>
+          </section>
+        </div>
+      </div>
+      <div class="next-project"><a href="./semeval.html">← SemEval</a><a href="./verirag.html">Next: VeriRAG →</a></div>
+    </main>
+    <footer><p>Mohamed Aziz Ben Taher</p><p>Radiomics methodology case study</p><p>© <span id="year">2026</span></p></footer>
+    <script src="../script.js"></script>
+  </body>
+</html>

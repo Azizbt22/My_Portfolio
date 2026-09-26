@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      name="description"
+      content="A complete data-science study of mobile video Quality of Experience: exploration, model comparison, feature ablation and interpretation."
+    />
+    <title>Video QoE prediction | Aziz Ben Taher</title>
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="../v2.css" />
+  </head>
+  <body class="project-page refactory-page research-case">
+    <header class="site-header v2-header">
+      <a class="wordmark" href="../index.html"
+        ><span>AZIZ</span><small>AI · DATA · ENGINEERING</small></a
+      >
+      <nav>
+        <a href="../index.html#about">About</a
+        ><a href="../index.html#journey">Journey</a
+        ><a href="../index.html#projects">Projects</a
+        ><a class="nav-cta" href="../index.html#contact">Contact</a>
+      </nav>
+    </header>
+    <div class="project-nav">
+      <a href="../index.html#projects">← All projects</a><span>03 / 06</span>
+    </div>
+    <main class="refactory-main">
+      <section class="case-hero refactory-hero">
+        <p class="case-breadcrumb">
+          Data science · Supervised learning · Interpretability
+        </p>
+        <h1>Understanding video<br />Quality of Experience</h1>
+        <p class="case-intro">
+          A study of which technical signals best explain how viewers rate a
+          mobile streaming session, and whether using more contextual data
+          actually improves prediction.
+        </p>
+        <dl class="case-facts">
+          <div>
+            <dt>Target</dt>
+            <dd>MOS from 1 to 5</dd>
+          </div>
+          <div>
+            <dt>Question</dt>
+            <dd>Which feature families matter?</dd>
+          </div>
+          <div>
+            <dt>Study</dt>
+            <dd>7 model families</dd>
+          </div>
+          <div>
+            <dt>Best weighted F1</dt>
+            <dd>0.839 · reduced set</dd>
+          </div>
+        </dl>
+      </section>
+      <div class="case-study-layout">
+        <aside class="case-toc">
+          <p>Case study</p>
+          <a href="#context">Context</a><a href="#challenges">Challenges</a
+          ><a href="#problem">Objectives</a><a href="#data">Exploration</a
+          ><a href="#method">Protocol</a><a href="#models">Models</a
+          ><a href="#results">Results</a><a href="#meaning">Interpretation</a
+          ><a href="#limits">Limits</a>
+        </aside>
+        <div class="case-study-content">
+          <section class="chapter" id="context">
+            <p class="chapter-number">01 / Context</p>
+            <h2>
+              Network quality is measurable. User experience is not that simple.
+            </h2>
+            <p class="chapter-lead">
+              A streaming platform can record bitrate, buffering, dropped frames
+              and network conditions. Those measurements describe the service,
+              but the final question is human: did the viewer experience the
+              session as good or bad?
+            </p>
+            <p>
+              Quality of Experience connects the two through a Mean Opinion
+              Score (MOS) from 1 to 5. I studied whether playback, network,
+              device and user signals can predict that score, and which of
+              those signals actually help.
+            </p>
+            <div class="chapter-grid two">
+              <article>
+                <h3>Observed signals</h3>
+                <p>
+                  Playback behaviour, network conditions, device properties and
+                  user context for each mobile video session.
+                </p>
+              </article>
+              <article>
+                <h3>Outcome to explain</h3>
+                <p>
+                  A subjective quality score. Two technically similar sessions
+                  can still be perceived differently.
+                </p>
+              </article>
+            </div>
+          </section>
+          <section class="chapter" id="challenges">
+            <p class="chapter-number">02 / Modelling challenges</p>
+            <h2>Why perceived quality is difficult to predict.</h2>
+            <p class="chapter-lead">
+              Quality of Experience connects measurable network events to a
+              subjective human rating. The relationship is useful, but noisy,
+              imbalanced and influenced by several feature families.
+            </p>
+            <div class="challenge-table" role="table" aria-label="Quality of Experience modelling challenges">
+              <div class="challenge-head" role="row"><span>Constraint</span><span>Mechanism</span><span>Impact</span></div>
+              <article role="row"><h3><small>01</small>Subjective target</h3><p>MOS records a viewer judgement, not a direct physical measurement.</p><p>Similar technical sessions can receive different scores.</p></article>
+              <article role="row"><h3><small>02</small>Class imbalance</h3><p>Ratings 4 and 5 dominate, while poor sessions are rare.</p><p>Accuracy can hide weak recognition of the cases that matter most operationally.</p></article>
+              <article role="row"><h3><small>03</small>Mixed feature families</h3><p>Playback, network, device and user variables differ in coverage, scale and reliability.</p><p>Additional context can add noise and reduce generalisation.</p></article>
+              <article role="row"><h3><small>04</small>Ordinal structure</h3><p>MOS classes have a natural order from 1 to 5.</p><p>A one-level error should be interpreted differently from a prediction at the opposite end of the scale.</p></article>
+            </div>
+          </section>
+          <section class="chapter" id="problem">
+            <p class="chapter-number">03 / Objectives and constraints</p>
+            <h2>Predict the score and understand what earns its place.</h2>
+            <p class="chapter-lead">
+              The dataset combines four feature families: application behaviour
+              (QoA), network service (QoS), device information (QoD) and user
+              context (QoU). Device models have a long tail of rarely observed
+              categories, and the target strongly favours ratings 4 and 5.
+            </p>
+            <p>
+              This creates two risks. A model can achieve a reassuring overall
+              score by mostly recognising the dominant classes; and weak
+              contextual variables can add noise while appearing useful simply
+              because they increase the feature count.
+            </p>
+            <blockquote class="problem-statement">
+              Which model predicts perceived quality most reliably, and does a
+              focused QoA + QoS feature set generalise better than the complete
+              table?
+            </blockquote>
+            <div class="objective-table compact-objectives">
+              <article><span>01</span><div><h3>Predictive quality</h3><p>Compare model families under one holdout and cross-validation protocol.</p></div><strong>Reliable comparison</strong></article>
+              <article><span>02</span><div><h3>Class imbalance</h3><p>Use weighted F1 as the primary comparison, then read confusion matrices for individual classes.</p></div><strong>Beyond accuracy</strong></article>
+              <article><span>03</span><div><h3>Feature value</h3><p>Compare the full feature configuration with a smaller QoA + QoS configuration.</p></div><strong>Test the scope</strong></article>
+              <article><span>04</span><div><h3>Interpretability</h3><p>Explain prediction patterns and inspect where ratings are confused.</p></div><strong>Actionable findings</strong></article>
+            </div>
+          </section>
+          <section class="chapter" id="data">
+            <p class="chapter-number">04 / Exploratory analysis</p>
+            <h2>Exploration determined the protocol before modelling began.</h2>
+            <p class="chapter-lead">
+              The target distribution immediately ruled out accuracy as the only
+              metric. Class 4 dominates the sample, while classes 1 and 2
+              contain far fewer sessions. I therefore kept weighted F1 for
+              overall performance and macro F1 to give every MOS class equal
+              visibility. Weighted F1 became the primary model selection
+              metric; confusion matrices reveal errors hidden by an average.
+            </p>
+            <div class="qoe-feature-grid">
+              <article><small>QoA · Application</small><h3>What happened during playback?</h3><p>Bitrate, frame rate, buffering duration and count, dropped frames, audio loss.</p></article>
+              <article><small>QoS · Network</small><h3>How was the stream delivered?</h3><p>Network conditions and service information associated with each session.</p></article>
+              <article><small>QoD · Device</small><h3>On what device?</h3><p>Device model and operating system; many model categories appear only rarely.</p></article>
+              <article><small>QoU · User</small><h3>In what user context?</h3><p>Basic demographic and usage descriptors, including age and gender.</p></article>
+            </div>
+            <figure class="product-shot">
+              <img
+                src="../assets/images/qoe/mos-source.png"
+                alt="Distribution of MOS ratings from one to five"
+              />
+              <figcaption>
+                The imbalance is part of the modelling problem: a useful model
+                must not obtain its score by ignoring rare low-quality sessions.
+              </figcaption>
+            </figure>
+            <p>
+              Buffering duration and count, dropped frames and audio loss show
+              skewed distributions with rare severe events. Discarding these
+              sessions would remove the very degradations a QoE model should
+              recognize. The protocol keeps the rows and caps numerical
+              extremes at training-derived percentile limits.
+            </p>
+            <details class="qoe-details qoe-figure-details"><summary>Inspect the report’s numerical distributions</summary>
+              <figure class="product-shot">
+                <img src="../assets/images/qoe/boxplots-report.png" alt="Boxplots of the dataset variables, including buffering time, dropped frames, identifiers and MOS" loading="lazy" />
+                <figcaption>Buffering time, dropped frames and audio loss include large values. This exploratory figure also shows identifiers and MOS, which were not predictors.</figcaption>
+              </figure>
+            </details>
+            <p>
+              Buffering measures are moderately related to each other and to
+              dropped frames. No meaningful input was dropped solely because
+              of the correlation matrix. Session <code>id</code> and
+              <code>user_id</code> were excluded because identifiers can create
+              spurious patterns without describing perceived quality.
+            </p>
+            <figure class="product-shot">
+              <img
+                src="../assets/images/qoe/correlation-source.png"
+                alt="Correlation matrix of numerical streaming variables"
+              />
+              <figcaption>
+                Related playback metrics can still carry complementary information. Correlation alone was not used as a removal rule.
+              </figcaption>
+            </figure>
+          </section>
+          <section class="chapter" id="method">
+            <p class="chapter-number">05 / Experimental protocol</p>
+            <h2>Split first, learn preprocessing on the training data.</h2>
+            <p class="chapter-lead">
+              I reserved 20% of the sessions for final testing. Encoding,
+              scaling, percentile limits, feature decisions and hyperparameter
+              selection used only the 80% training portion. This keeps
+              information from the holdout out of the fitted pipeline.
+            </p>
+            <div class="qoe-protocol">
+              <article><span>01 / FEATURE SELECTION AND CLEANING</span><h3>Remove misleading identifiers</h3><p><code>id</code> and <code>user_id</code> identify sessions and users; neither describes playback quality. I excluded them before modelling. The correlation analysis did not justify dropping the measured playback variables: related features can still capture different aspects of an interruption.</p></article>
+              <article><span>02 / TRAIN AND TEST SPLIT</span><h3>Reserve the final test set</h3><p>An 80/20 split gave a training portion for preprocessing and model selection and a separate holdout for final scores. Data-derived transformations and tuning used the training portion only, preventing the holdout from influencing fitted settings.</p></article>
+              <article><span>03 / CATEGORICAL ENCODING</span><h3>Avoid invented numeric order</h3><p>Network type, device model and similar categories were one-hot encoded. A model can then use each category independently without treating arbitrary category codes as magnitudes.</p></article>
+              <article><span>04 / NUMERICAL SCALING</span><h3>Put measurements on comparable scales</h3><p>Numerical variables were standardized with z-scores. Scale particularly affects logistic regression, SVM and KNN because their optimization or distance calculations depend on input magnitudes. Tree models were evaluated through the same general pipeline for comparison.</p></article>
+              <article><span>05 / OUTLIER HANDLING</span><h3>Retain severe sessions</h3><p>Buffering time, dropped frames and audio loss contain rare high values that may represent real failures. Winsorisation capped numerical extremes at the training-derived 1st and 99th percentiles, limiting their influence while preserving the observations.</p></article>
+              <article><span>06 / FEATURE ENGINEERING</span><h3>Represent a possible interaction</h3><p>The initial full configuration included a derived feature combining buffering duration and bitrate. It represented the idea that an interruption could be perceived differently under different delivery conditions. I used it as a controlled feature-engineering attempt, then removed it in the reduced configuration to keep that comparison interpretable.</p></article>
+              <article><span>07 / ALTERNATIVE FEATURE SETS</span><h3>Test whether context helps</h3><p>The full configuration used QoA, QoS, QoD, QoU and the derived feature. The reduced configuration kept QoA and QoS, removing the device and user groups and the engineered feature. The measured change therefore belongs to that complete configuration change.</p></article>
+              <article><span>08 / CLASS IMBALANCE</span><h3>Account for the rare low ratings</h3><p>Ratings 4 and 5 dominate, while ratings 1 and 2 are scarce. I used class-weighted losses for compatible models and weighted F1 as the main comparison metric, then checked per-class errors in the confusion matrices.</p></article>
+            </div>
+            <p class="qoe-protocol-note">The test portion remained untouched during cross-validation, grid search and preprocessing decisions. The 1st/99th percentile treatment changes feature values, not the number of sessions.</p>
+          </section>
+          <section class="chapter" id="models">
+            <p class="chapter-number">06 / Modelling</p>
+            <h2>Seven approaches to the same five-class target.</h2>
+            <p class="chapter-lead">MOS is ordered, but I formulated prediction as multiclass classification. This avoids treating the distance between successive ratings as necessarily equal. The model comparison probes different assumptions on mixed tabular data with only several hundred sessions.</p>
+            <div class="qoe-model-grid">
+              <article><strong>Linear</strong><h3>Logistic regression</h3><p>A baseline for relationships captured without nonlinear splits.</p></article>
+              <article><strong>Margin</strong><h3>SVM</h3><p>Tests nonlinear decision boundaries on standardized features.</p></article>
+              <article><strong>Distance</strong><h3>KNN</h3><p>Tests whether nearby sessions share a quality rating.</p></article>
+              <article><strong>Tree</strong><h3>Decision tree</h3><p>Captures threshold effects and interactions in one interpretable tree.</p></article>
+              <article><strong>Ensembles</strong><h3>Random Forest · XGBoost</h3><p>Combines trees to model nonlinear interactions across playback conditions.</p></article>
+              <article><strong>Neural</strong><h3>MLP</h3><p>Checks whether a small neural model helps on this tabular sample.</p></article>
+            </div>
+            <h3 class="qoe-subhead">Evaluation metrics</h3>
+            <p>Accuracy measures the share of exact ratings, but it can look strong when common ratings dominate. F1 combines precision and recall. Weighted F1 averages class-level F1 using each class’s support and was the report’s main selection metric. Macro F1 gives each rating equal weight, so it helps reveal performance differences hidden by the class distribution. Confusion matrices provide the actual error pattern for every rating.</p>
+            <p class="qoe-protocol-note">Weighted F1 alone does not guarantee good performance on rare ratings: common classes receive more weight. I therefore show macro F1 and inspect the confusion matrices as complementary views.</p>
+            <h3 class="qoe-subhead">Hyperparameter selection</h3>
+            <p>I used a limited grid search with cross-validation on the 80% training portion for model settings. The held-out 20% was used after that process for the reported comparison. I kept the tuning step limited so the comparison stayed focused on modelling assumptions and feature scope, with final scores reserved for the untouched test set.</p>
+          </section>
+          <section class="chapter" id="results">
+            <p class="chapter-number">07 / Results</p>
+            <h2>
+              The best result came from a smaller, more coherent feature set.
+            </h2>
+            <p class="chapter-lead">
+              With all feature groups, tuned Random Forest reached 0.832
+              weighted F1. On the reduced QoA + QoS configuration it reached
+              0.839, a gain of 0.007. XGBoost was close on weighted F1 and
+              slightly higher on macro F1 in both comparisons.
+            </p>
+            <p>Tree ensembles led the comparison, consistent with interactions among playback variables that a linear baseline cannot express directly. KNN had the lowest weighted F1 on the full configuration and benefited most from reducing the feature set. The MLP did not improve on the tree ensembles in this sample; with several hundred observations, its flexibility was not an advantage here.</p>
+            <div class="qoe-ablation-table-wrap"><table class="data-table qoe-ablation-table"><thead><tr><th>Model</th><th>Full · weighted F1</th><th>Reduced · weighted F1</th><th>Change</th></tr></thead><tbody>
+              <tr><td>Random Forest · tuned</td><td>0.832</td><td>0.839</td><td>+0.007</td></tr>
+              <tr><td>XGBoost · tuned</td><td>0.821</td><td>0.822</td><td>+0.001</td></tr>
+              <tr><td>Logistic regression</td><td>0.797</td><td>0.810</td><td>+0.013</td></tr>
+              <tr><td>SVM</td><td>0.792</td><td>0.822</td><td>+0.029</td></tr>
+              <tr><td>MLP</td><td>0.775</td><td>0.776</td><td>+0.001</td></tr>
+              <tr><td>KNN</td><td>0.703</td><td>0.744</td><td>+0.041</td></tr>
+            </tbody></table></div>
+            <p class="qoe-protocol-note">Rounded from the two result tables. The standalone Decision Tree appears in the confusion matrices, but its aggregate score is not listed in the same comparable format. Because the reduced setting removed QoD, QoU and the engineered interaction together, the gain should be read as a feature-set result.</p>
+            <p>The reduction improved weighted F1 across the six tabulated models, but the size of the gain varied. The full and reduced comparisons therefore support a narrower feature scope for this dataset; they do not establish that device or user context is always unhelpful.</p>
+            <details class="qoe-details"><summary>Reduced configuration: full metric table</summary><div class="qoe-ablation-table-wrap"><table class="data-table">
+              <thead>
+                <tr>
+                  <th>Model · QoA + QoS</th>
+                  <th>Accuracy</th>
+                  <th>Weighted F1</th>
+                  <th>Macro F1</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Random Forest · tuned</td>
+                  <td>0.835</td>
+                  <td>0.839</td>
+                  <td>0.797</td>
+                </tr>
+                <tr>
+                  <td>XGBoost · tuned</td>
+                  <td>0.822</td>
+                  <td>0.822</td>
+                  <td>0.799</td>
+                </tr>
+                <tr>
+                  <td>SVM</td>
+                  <td>0.822</td>
+                  <td>0.822</td>
+                  <td>0.766</td>
+                </tr>
+                <tr>
+                  <td>Logistic regression</td>
+                  <td>0.806</td>
+                  <td>0.810</td>
+                  <td>0.759</td>
+                </tr>
+                <tr>
+                  <td>MLP</td>
+                  <td>0.780</td>
+                  <td>0.776</td>
+                  <td>0.690</td>
+                </tr>
+                <tr>
+                  <td>KNN</td>
+                  <td>0.751</td>
+                  <td>0.744</td>
+                  <td>0.655</td>
+                </tr>
+              </tbody>
+            </table></div></details>
+            <h3 class="qoe-subhead">Where the predictions went wrong</h3>
+            <p>A confusion matrix places the true class on each row and the predicted class in each column. Values on the diagonal are correct predictions; off-diagonal values show exactly which ratings were confused.</p>
+            <figure class="figure qoe-wide-figure">
+              <a href="../assets/images/qoe/confusion-matrices-clean.png" target="_blank" aria-label="Open the confusion matrices at full resolution"><img src="../assets/images/qoe/confusion-matrices-clean.png" alt="Standalone confusion matrices for logistic regression, SVM, KNN, decision tree, Random Forest, XGBoost and MLP using the reduced feature set" loading="lazy" /></a>
+              <figcaption>Reduced feature set. The figure uses encoded class indices 0–4 for the report’s MOS ratings 1–5. Its largest off-diagonal counts lie between neighbouring ratings, particularly MOS 3 and 4. Select the image to zoom.</figcaption>
+            </figure>
+            <p>Random Forest and XGBoost have strong diagonals. KNN has visibly more spillover, including at the low end of the rating scale. Errors from very poor to very good quality are rare. The boundary between moderate and good quality remains harder to classify, which is plausible for a subjective score.</p>
+          </section>
+          <section class="chapter" id="meaning">
+            <p class="chapter-number">08 / Interpretation</p>
+            <h2>Playback signals carried the most useful information.</h2>
+            <p class="chapter-lead">
+              The reduced experiment slightly improved weighted F1 for every
+              tabulated model. This is consistent with the long tail of
+              device categories and the stronger playback signals in this
+              sample. The experiment also removed the engineered interaction,
+              so it does not quantify QoD or QoU independently.
+            </p>
+            <h3 class="qoe-subhead">Reading feature effects with SHAP</h3>
+            <p>SHAP assigns a contribution to each feature for a model prediction. Across many sessions, the spread of these contributions helps explore which inputs the model uses and how their effects vary. These values describe the fitted model; they do not establish a causal effect on a viewer.</p>
+            <figure class="figure qoe-wide-figure qoe-shap-figure">
+              <a href="../assets/images/qoe/shap-source.png" target="_blank" aria-label="Open the SHAP graphic at full resolution"><img src="../assets/images/qoe/shap-source.png" alt="Original SHAP interaction summary supplied with the QoE report; labels include bitrate, frame rate, resolution, id and user_id" loading="lazy" /></a>
+              <figcaption>Original interaction plot supplied with the study. Its visible labels include bitrate, frame rate and resolution, alongside <code>id</code> and <code>user_id</code>.</figcaption>
+            </figure>
+            <p>The interpretation is consistent with the rest of the analysis: buffering, dropped frames and bitrate carry most of the useful signal. The supplied SHAP image also shows identifiers that were excluded in the written preprocessing protocol, so I treat this specific graphic as exploratory and use the model comparison plus ablation results as the stronger evidence.</p>
+            <div class="chapter-grid three">
+              <article>
+                <h3>What mattered</h3>
+                <p>
+                  The model comparison, ablation and SHAP discussion point toward
+                  playback conditions, especially interruptions, bitrate and frame stability.
+                </p>
+              </article>
+              <article>
+                <h3>What errors said</h3>
+                <p>
+                  The model understood the ordering imperfectly: it usually
+                  missed by one adjacent MOS level.
+                </p>
+              </article>
+              <article>
+                <h3>What ablation added</h3>
+                <p>
+                  Random Forest gained 0.007 weighted F1, while KNN gained
+                  0.041. The effect varied across model families.
+                </p>
+              </article>
+            </div>
+          </section>
+          <section class="chapter" id="limits">
+            <p class="chapter-number">09 / Critical perspective</p>
+            <h2>Scope of the conclusion.</h2>
+            <p class="chapter-lead">
+              MOS is subjective, the sample covers several hundred sessions,
+              and evaluation comes from one mobile streaming dataset. These
+              results describe this experiment; external data would be needed
+              to establish how the models perform across services and networks.
+            </p>
+            <div class="chapter-grid three">
+              <article>
+                <h3>Ordinal target</h3>
+                <p>
+                  Treating MOS as five classes ignores that confusing 4 with 5
+                  is less severe than confusing 1 with 5. Ordinal objectives
+                  would be a useful extension.
+                </p>
+              </article>
+              <article>
+                <h3>Generalisation</h3>
+                <p>
+                  A stronger study would validate on another network, device
+                  population or streaming service.
+                </p>
+              </article>
+              <article>
+                <h3>Rare classes</h3>
+                <p>
+                  More low-quality sessions would make conclusions about classes
+                  1 and 2 more reliable.
+                </p>
+              </article>
+            </div>
+            <h3 class="qoe-subhead">What I learned</h3>
+            <p>On a modest tabular dataset, feature scope and evaluation design mattered at least as much as trying another model family. Removing the device and user groups together with the engineered feature slightly improved the tested models, while the confusion matrices showed a persistent boundary between adjacent ratings. The project also reinforced a practical lesson: an explanation plot has to be checked against the exact evaluated pipeline before its ranking is used as evidence.</p>
+            <ul class="tech-list">
+              <li>Python</li>
+              <li>scikit-learn</li>
+              <li>XGBoost</li>
+              <li>SHAP</li>
+              <li>Cross-validation</li>
+              <li>Feature ablation</li>
+            </ul>
+            <div class="document-links">
+              <a href="../reports/qoe-project-report.pdf" target="_blank"
+                >Read full report ↗</a
+              >
+            </div>
+          </section>
+        </div>
+      </div>
+      <div class="next-project">
+        <a href="./data-scientist-copilot.html">← Data Scientist Copilot</a
+        ><a href="./semeval.html">Next: SemEval →</a>
+      </div>
+    </main>
+    <footer>
+      <p>Mohamed Aziz Ben Taher</p>
+      <p>Video QoE case study</p>
+      <p>© <span id="year">2026</span></p>
+    </footer>
+    <script src="../script.js"></script>
+  </body>
+</html>
